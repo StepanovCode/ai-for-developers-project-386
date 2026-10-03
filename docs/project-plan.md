@@ -106,8 +106,8 @@ backend/
 | 5 | Тестовые раннеры и дымовые тесты | Завершён | 3–4 |
 | 6 | Линтеры, форматирование и команды проверки | Завершён | 3–5 |
 | 7 | shadcn MCP и GitHub Actions MCP | Ожидает внешнего действия | 1–3; доступ к GitHub |
-| 8 | Conventional Commits и CI | В работе | 5–6 |
-| 9 | release-please и проверка release-PR | В работе | 8; доступ к GitHub |
+| 8 | Conventional Commits и CI | Ожидает внешнего действия | 5–6 |
+| 9 | release-please и проверка release-PR | Ожидает внешнего действия | 8; доступ к GitHub |
 
 ## Этап 1. Создать изолированное окружение Docker Compose
 
@@ -795,6 +795,18 @@ REST-права на создание PR. Управление браузеро�
 Computer Use permissions. Пользователь подтвердил, что создаст PR вручную;
 после его появления продолжить проверку CI, затем merge каркаса и release-PR.
 Наличие RELEASE_PLEASE_TOKEN пока не подтверждено.
+
+Пользователь создал [PR #1](https://github.com/StepanovCode/ai-for-developers-project-386/pull/1)
+с корректным заголовком `feat: add application scaffold`.
+[CI на pull_request](https://github.com/StepanovCode/ai-for-developers-project-386/actions/runs/37147783521)
+запустился. Job commits отклонил опубликованный позднее коммит `95dcddf`
+с сообщением `update`; проверка заголовка PR после него не выполнялась.
+Пользователь разрешил исправить сообщение. Коммит заменён на `46ac12a`
+(`docs: record CI verification and remaining GitHub setup`) без изменения
+содержимого; выполнен push --force-with-lease с проверкой прежнего SHA.
+Локальный `make commits-check` принял оба коммита без ошибок и предупреждений.
+До успешного повторного CI PR не сливать.
+Затем проверить secret RELEASE_PLEASE_TOKEN, merge каркаса и создание release-PR.
 
 ## Официальные источники
 
