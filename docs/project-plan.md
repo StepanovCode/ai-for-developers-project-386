@@ -781,6 +781,21 @@ release-please прошла проверку по официальной JSON Sc
 Начальный CHANGELOG.md оставлен пустым: updater сам добавляет заголовок.
 Независимое ревью конфигурации не выявило существенных замечаний.
 
+Опубликован коммит `dd46a0d` (`feat: add application scaffold`) в ветке
+`codex/ci-and-releases`. На push прошли все три задания нового
+[CI](https://github.com/StepanovCode/ai-for-developers-project-386/actions/runs/37141197150):
+frontend, backend, commits. Также прошёл
+[hexlet-check](https://github.com/StepanovCode/ai-for-developers-project-386/actions/runs/37141197104).
+Через GitHub connector прочитаны jobs и лог commitlint/actionlint; ошибок нет.
+Проверка заголовка PR на push ожидаемо пропущена, реальный PR-run ещё требуется.
+
+Создание PR через GitHub connector вернуло HTTP 403
+`Resource not accessible by integration`. SSH push работает, но не даёт
+REST-права на создание PR. Управление браузером недоступно из-за отсутствия
+Computer Use permissions. Пользователь подтвердил, что создаст PR вручную;
+после его появления продолжить проверку CI, затем merge каркаса и release-PR.
+Наличие RELEASE_PLEASE_TOKEN пока не подтверждено.
+
 ## Официальные источники
 
 При реализации проверять актуальные инструкции и совместимость версий.
