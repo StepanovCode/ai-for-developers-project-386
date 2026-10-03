@@ -1,0 +1,15 @@
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+  "bootstrap-sha": "ae06de98154f3726f4279408c32a153ba091aa8e",
+  "packages": {
+    ".": {
+      "release-type": "simple",
+      "package-name": "ai-for-developers-project-386",
+      "changelog-path": "CHANGELOG.md",
+      "include-component-in-tag": false,
+      "initial-version": "0.1.0",
+      "bump-minor-pre-major": true,
+      "bump-patch-for-minor-pre-major": false
+    }
+  }
+}

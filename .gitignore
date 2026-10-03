@@ -1,0 +1,38 @@
+# Keep the shared project instructions despite a global AGENTS.md ignore rule.
+!/AGENTS.md
+
+# Share only the secret-free project MCP configuration.
+!/.codex/
+/.codex/*
+!/.codex/config.toml
+
+# Local configuration and secrets (safe examples stay in Git).
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+
+# Dependencies, caches and generated output.
+node_modules/
+.npm/
+.cache/
+.vite/
+dist/
+coverage/
+*.tsbuildinfo
+/backend/bin/
+/backend/tmp/
+*.test
+coverage.out
+coverage.txt
+*.log
+
+# Local editor and OS files.
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*~
