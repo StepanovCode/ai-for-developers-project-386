@@ -1,0 +1,13 @@
+# Project-scoped MCP servers. Existing user-level servers remain unchanged.
+[mcp_servers.shadcn]
+command = "docker"
+args = ["compose", "run", "--rm", "--no-deps", "-T", "frontend", "./node_modules/.bin/shadcn", "mcp", "--cwd", "/workspace/frontend"]
+cwd = "."
+startup_timeout_sec = 60
+tool_timeout_sec = 60
+
+[mcp_servers.github_actions]
+url = "https://api.githubcopilot.com/mcp/x/actions/readonly"
+bearer_token_env_var = "GITHUB_MCP_TOKEN"
+startup_timeout_sec = 30
+tool_timeout_sec = 60

@@ -1,0 +1,4 @@
+# Development images only need their Dockerfiles; sources use bind mounts.
+**
+!docker/
+!docker/*.Dockerfile

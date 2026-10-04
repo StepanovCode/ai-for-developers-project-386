@@ -1,0 +1,62 @@
+name: ai-for-developers-project-386
+
+services:
+  tooling:
+    profiles: ["tools"]
+    build:
+      context: .
+      dockerfile: docker/tooling.Dockerfile
+    working_dir: /workspace
+    environment:
+      NPM_CONFIG_CACHE: /cache/npm
+    volumes:
+      - .:/workspace:ro
+      - ./tools:/workspace/tools
+      - tooling_node_modules:/workspace/tools/node_modules
+      - npm_cache:/cache/npm
+
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/frontend.Dockerfile
+    working_dir: /workspace/frontend
+    init: true
+    command: ["npm", "run", "dev"]
+    environment:
+      NPM_CONFIG_CACHE: /cache/npm
+    volumes:
+      - ./frontend:/workspace/frontend
+      - frontend_node_modules:/workspace/frontend/node_modules
+      - npm_cache:/cache/npm
+    ports:
+      - "127.0.0.1:${FRONTEND_PORT:-5173}:5173"
+      - "127.0.0.1:${FRONTEND_PREVIEW_PORT:-4173}:4173"
+
+  backend:
+    build:
+      context: .
+      dockerfile: docker/backend.Dockerfile
+    working_dir: /workspace/backend
+    init: true
+    command: ["sh", "-c", "go build -o /tmp/api ./cmd/api && exec /tmp/api"]
+    stop_grace_period: 10s
+    environment:
+      PORT: "8080"
+      GIN_MODE: release
+      GOFLAGS: -mod=readonly
+      GOMODCACHE: /go/pkg/mod
+      GOCACHE: /cache/go-build
+      GOTOOLCHAIN: local
+    volumes:
+      - ./backend:/workspace/backend
+      - go_modules:/go/pkg/mod
+      - go_build_cache:/cache/go-build
+    ports:
+      - "127.0.0.1:${BACKEND_PORT:-8080}:8080"
+
+volumes:
+  tooling_node_modules:
+  frontend_node_modules:
+  npm_cache:
+  go_modules:
+  go_build_cache:
