@@ -43,8 +43,7 @@ function HomePage() {
         </section>
 
         <Card className="features-card">
-          <CardHeader className="features-header">
-            <p className="card-kicker">Просто и удобно</p>
+          <CardHeader>
             <CardTitle className="features-title">Возможности</CardTitle>
           </CardHeader>
           <CardContent>
