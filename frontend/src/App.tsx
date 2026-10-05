@@ -7,6 +7,7 @@ import {
   UserRoundCheck,
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { ServiceStatus } from '@/components/service-status'
 
 function SiteHeader() {
   return (
@@ -106,6 +107,7 @@ function App() {
   return (
     <>
       <SiteHeader />
+      <ServiceStatus />
       {isBookingPage ? <BookingPlaceholder /> : <HomePage />}
     </>
   )

@@ -18,6 +18,11 @@
 | React Hooks / React Refresh ESLint plugins | 7.1.1 / 0.5.7 | `frontend/package.json` и lockfile |
 | globals / Prettier | 17.12.0 / 3.9.9 | `frontend/package.json` и lockfile |
 
+Цепочка API проверена отдельно 2026-10-05: TypeSpec 1.16.0, Hey API 0.99.0,
+TypeScript 6.0.2, oapi-codegen 2.8.0, gin-middleware 1.1.0 и runtime 1.7.0.
+Версии, lockfiles, найденные особенности совместимости и воспроизведение
+описаны в [API-контракте](../api/README.md).
+
 Dockerfile — источник версий окружения. Не добавляем дублирующие `.nvmrc`,
 `.node-version` или установку языковых инструментов на хосте. Точные теги
 закрепляют версии инструментов; digest образа сейчас не фиксируется, поэтому

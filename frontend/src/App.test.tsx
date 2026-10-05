@@ -1,9 +1,38 @@
-import { render, screen } from '@testing-library/react'
-import { afterEach, expect, test } from 'vitest'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import App from './App'
 
+const healthResponse = () =>
+  new Response(JSON.stringify({ status: 'ok' }), {
+    status: 200,
+    headers: { 'Content-Type': 'application/json' },
+  })
+
+beforeEach(() => {
+  vi.stubGlobal(
+    'fetch',
+    vi.fn().mockImplementation(async () => healthResponse()),
+  )
+})
+
 afterEach(() => {
+  vi.unstubAllGlobals()
   window.history.replaceState({}, '', '/')
+})
+
+test('приложение вызывает настоящий SDK и позволяет повторить health после ошибки', async () => {
+  const fetchMock = vi
+    .fn()
+    .mockRejectedValueOnce(new TypeError('offline'))
+    .mockImplementation(async () => healthResponse())
+  vi.stubGlobal('fetch', fetchMock)
+  render(<App />)
+  expect(await screen.findByRole('alert')).toHaveTextContent('Сервис временно недоступен')
+  fireEvent.click(screen.getByRole('button', { name: 'Повторить' }))
+  await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2))
+  await waitFor(() => expect(screen.queryByRole('alert')).not.toBeInTheDocument())
+  const request: Request = fetchMock.mock.calls[0][0]
+  expect(new URL(request.url).pathname).toBe('/api/health')
 })
 
 test('главная показывает сервис и обе ссылки на запись', () => {

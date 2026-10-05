@@ -1,0 +1,802 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "На связи API",
+    "version": "1.0.0"
+  },
+  "tags": [],
+  "paths": {
+    "/api/bookings": {
+      "post": {
+        "operationId": "createBooking",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "The request has succeeded and a new resource has been created as a result.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BookingConfirmation"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "SLOT_UNAVAILABLE: busy or no longer eligible time. Do not substitute a different slot. Guest name/email are preserved, selection cleared, slots refreshed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The server cannot find the requested resource.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Client error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorBody"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateBooking"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/bookings/{id}": {
+      "get": {
+        "operationId": "getBooking",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request has succeeded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BookingConfirmation"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The server cannot find the requested resource.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Client error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorBody"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/event-types": {
+      "get": {
+        "operationId": "listEventTypes",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "The request has succeeded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventTypeCatalog"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "createEventType",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "The request has succeeded and a new resource has been created as a result.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventType"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Client error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorBody"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateEventType"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/event-types/{id}": {
+      "get": {
+        "operationId": "getEventType",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request has succeeded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventTypeDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The server cannot find the requested resource.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Client error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorBody"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/event-types/{id}/slots": {
+      "get": {
+        "operationId": "getSlots",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request has succeeded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SlotWindow"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The server cannot find the requested resource.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Client error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorBody"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/health": {
+      "get": {
+        "operationId": "getHealth",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "The request has succeeded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Health"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/meetings": {
+      "get": {
+        "operationId": "listMeetings",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "The request has succeeded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeetingList"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "BookingConfirmation": {
+        "type": "object",
+        "required": [
+          "id",
+          "eventTypeId",
+          "eventTypeName",
+          "durationMinutes",
+          "startsAt",
+          "endsAt",
+          "timeZone",
+          "owner"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/ID"
+          },
+          "eventTypeId": {
+            "$ref": "#/components/schemas/ID"
+          },
+          "eventTypeName": {
+            "$ref": "#/components/schemas/Name"
+          },
+          "durationMinutes": {
+            "$ref": "#/components/schemas/DurationMinutes"
+          },
+          "startsAt": {
+            "$ref": "#/components/schemas/Instant"
+          },
+          "endsAt": {
+            "$ref": "#/components/schemas/Instant"
+          },
+          "timeZone": {
+            "type": "string",
+            "enum": [
+              "Europe/Moscow"
+            ]
+          },
+          "owner": {
+            "$ref": "#/components/schemas/Owner"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Immediately confirmed immutable booking. Public response never includes guest name/email. POST and GET share this model."
+      },
+      "CalendarDate": {
+        "type": "string",
+        "format": "date",
+        "description": "Calendar date YYYY-MM-DD in Europe/Moscow, not an instant or a rolling 24-hour period."
+      },
+      "CreateBooking": {
+        "type": "object",
+        "required": [
+          "eventTypeId",
+          "startsAt",
+          "guestName",
+          "guestEmail"
+        ],
+        "properties": {
+          "eventTypeId": {
+            "$ref": "#/components/schemas/ID"
+          },
+          "startsAt": {
+            "$ref": "#/components/schemas/Instant"
+          },
+          "guestName": {
+            "$ref": "#/components/schemas/Name"
+          },
+          "guestEmail": {
+            "$ref": "#/components/schemas/Email"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Server determines owner, duration and end; rechecks grid, window, schedule, 30-minute notice and overlaps. No rounding, idempotency key, reservation or recovery after a lost response."
+      },
+      "CreateEventType": {
+        "type": "object",
+        "required": [
+          "name",
+          "description",
+          "durationMinutes"
+        ],
+        "properties": {
+          "name": {
+            "$ref": "#/components/schemas/Name"
+          },
+          "description": {
+            "$ref": "#/components/schemas/Description"
+          },
+          "durationMinutes": {
+            "$ref": "#/components/schemas/DurationMinutes"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Description": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 2000,
+        "description": "Plain text, not interpreted as HTML or Markdown. Trimmed before validation; internal line breaks preserved."
+      },
+      "DurationMinutes": {
+        "type": "integer",
+        "format": "int32",
+        "minimum": 1,
+        "maximum": 480
+      },
+      "Email": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 254,
+        "format": "email"
+      },
+      "ErrorBody": {
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "EventType": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "description",
+          "durationMinutes"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/ID"
+          },
+          "name": {
+            "$ref": "#/components/schemas/Name"
+          },
+          "description": {
+            "$ref": "#/components/schemas/Description"
+          },
+          "durationMinutes": {
+            "$ref": "#/components/schemas/DurationMinutes"
+          }
+        },
+        "additionalProperties": false
+      },
+      "EventTypeCatalog": {
+        "type": "object",
+        "required": [
+          "owner",
+          "items"
+        ],
+        "properties": {
+          "owner": {
+            "$ref": "#/components/schemas/Owner"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EventType"
+            }
+          }
+        },
+        "additionalProperties": false,
+        "description": "Shared public/admin catalog, oldest first. Empty catalog is an empty items array."
+      },
+      "EventTypeDetails": {
+        "type": "object",
+        "required": [
+          "owner",
+          "eventType"
+        ],
+        "properties": {
+          "owner": {
+            "$ref": "#/components/schemas/Owner"
+          },
+          "eventType": {
+            "$ref": "#/components/schemas/EventType"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Health": {
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "ok"
+            ]
+          }
+        },
+        "additionalProperties": false
+      },
+      "ID": {
+        "type": "string",
+        "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
+        "format": "uuid",
+        "description": "Server-generated UUID v4."
+      },
+      "Instant": {
+        "type": "string",
+        "format": "date-time",
+        "description": "RFC 3339 instant with an explicit Z or numeric offset. Responses use UTC (Z); display in Europe/Moscow."
+      },
+      "Meeting": {
+        "type": "object",
+        "required": [
+          "id",
+          "eventTypeId",
+          "eventTypeName",
+          "durationMinutes",
+          "startsAt",
+          "endsAt",
+          "timeZone",
+          "owner",
+          "guestName",
+          "guestEmail"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/ID"
+          },
+          "eventTypeId": {
+            "$ref": "#/components/schemas/ID"
+          },
+          "eventTypeName": {
+            "$ref": "#/components/schemas/Name"
+          },
+          "durationMinutes": {
+            "$ref": "#/components/schemas/DurationMinutes"
+          },
+          "startsAt": {
+            "$ref": "#/components/schemas/Instant"
+          },
+          "endsAt": {
+            "$ref": "#/components/schemas/Instant"
+          },
+          "timeZone": {
+            "type": "string",
+            "enum": [
+              "Europe/Moscow"
+            ]
+          },
+          "owner": {
+            "$ref": "#/components/schemas/Owner"
+          },
+          "guestName": {
+            "$ref": "#/components/schemas/Name"
+          },
+          "guestEmail": {
+            "$ref": "#/components/schemas/Email"
+          }
+        },
+        "additionalProperties": false
+      },
+      "MeetingList": {
+        "type": "object",
+        "required": [
+          "timeZone",
+          "items"
+        ],
+        "properties": {
+          "timeZone": {
+            "type": "string",
+            "enum": [
+              "Europe/Moscow"
+            ]
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Meeting"
+            }
+          }
+        },
+        "additionalProperties": false,
+        "description": "All bookings whose start is strictly after server now, earliest first, without pagination or 14-day limit. Open admin endpoint: includes guest contact details."
+      },
+      "Name": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 100,
+        "pattern": "^[^\\r\\n\\u0085\\u2028\\u2029]+$",
+        "description": "Single line, trimmed before validating length in Unicode characters; internal text is preserved."
+      },
+      "Owner": {
+        "type": "object",
+        "required": [
+          "id",
+          "name"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "enum": [
+              "default"
+            ]
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Slot": {
+        "type": "object",
+        "required": [
+          "startsAt",
+          "endsAt",
+          "status"
+        ],
+        "properties": {
+          "startsAt": {
+            "$ref": "#/components/schemas/Instant"
+          },
+          "endsAt": {
+            "$ref": "#/components/schemas/Instant"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "available",
+              "busy"
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "description": "Half-open [startsAt, endsAt) interval; busy slots contain no guest data. Selection does not reserve time."
+      },
+      "SlotDay": {
+        "type": "object",
+        "required": [
+          "date",
+          "slots"
+        ],
+        "properties": {
+          "date": {
+            "$ref": "#/components/schemas/CalendarDate"
+          },
+          "slots": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Slot"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "SlotWindow": {
+        "type": "object",
+        "required": [
+          "windowStart",
+          "windowEnd",
+          "timeZone",
+          "days"
+        ],
+        "properties": {
+          "windowStart": {
+            "$ref": "#/components/schemas/CalendarDate"
+          },
+          "windowEnd": {
+            "$ref": "#/components/schemas/CalendarDate"
+          },
+          "timeZone": {
+            "type": "string",
+            "enum": [
+              "Europe/Moscow"
+            ]
+          },
+          "days": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SlotDay"
+            },
+            "minItems": 14,
+            "maxItems": 14
+          }
+        },
+        "additionalProperties": false,
+        "description": "Today and the next 13 Moscow dates, inclusive, including dates with no slots. Server clock defines today. Starts follow a 15-minute grid from each configured working interval, at least 30 minutes ahead (inclusive). Entire meeting fits the working interval and window. Busy intervals reflect bookings of ALL types; invalid intervals are omitted. Default Mon–Fri 09:00–18:00; no buffers or holidays."
+      },
+      "ValidationErrorBody": {
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "type": "string",
+            "enum": [
+              "VALIDATION_ERROR"
+            ]
+          },
+          "message": {
+            "type": "string"
+          },
+          "fieldErrors": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  }
+}

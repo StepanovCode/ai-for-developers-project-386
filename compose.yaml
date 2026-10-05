@@ -1,6 +1,37 @@
 name: ai-for-developers-project-386
 
 services:
+  api-node:
+    profiles: ["tools"]
+    build:
+      context: .
+      dockerfile: docker/frontend.Dockerfile
+    working_dir: /workspace/api
+    environment:
+      NPM_CONFIG_CACHE: /cache/npm
+    volumes:
+      - ./api:/workspace/api
+      - api_node_modules:/workspace/api/node_modules
+      - ./frontend/src/api:/workspace/frontend/src/api
+      - npm_cache:/cache/npm
+
+  api-go:
+    profiles: ["tools"]
+    build:
+      context: .
+      dockerfile: docker/backend.Dockerfile
+    working_dir: /workspace/api/generator
+    environment:
+      GOFLAGS: -mod=readonly
+      GOMODCACHE: /go/pkg/mod
+      GOCACHE: /cache/go-build
+      GOTOOLCHAIN: local
+    volumes:
+      - ./api:/workspace/api
+      - ./backend/internal/api/generated:/workspace/backend/internal/api/generated
+      - go_modules:/go/pkg/mod
+      - go_build_cache:/cache/go-build
+
   tooling:
     profiles: ["tools"]
     build:
@@ -55,6 +86,7 @@ services:
       - "127.0.0.1:${BACKEND_PORT:-8080}:8080"
 
 volumes:
+  api_node_modules:
   tooling_node_modules:
   frontend_node_modules:
   npm_cache:

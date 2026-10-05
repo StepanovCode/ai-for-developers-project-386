@@ -24,6 +24,19 @@ RUN = $(COMPOSE) run --rm --no-deps -T
 .PHONY: typecheck frontend-typecheck format-check frontend-format-check backend-format-check
 .PHONY: format frontend-format backend-format check frontend-check backend-check
 .PHONY: tooling-build tooling-install commitlint commits-check workflows-check
+.PHONY: generate api-smoke
+
+# Sequential recipes fail immediately; generated artifacts are committed, not regenerated in CI.
+generate:
+	$(COMPOSE) --profile tools build api-node api-go
+	$(RUN) api-node npm ci
+	$(RUN) api-node npm run generate:openapi
+	$(RUN) api-node npm run generate:sdk
+	$(RUN) api-go go mod download
+	$(RUN) api-go go tool oapi-codegen --config ../oapi-codegen.yaml ../openapi.json
+
+api-smoke:
+	$(COMPOSE) exec -T -e API_SMOKE_URL=http://localhost:5173 frontend npm test -- src/api/health.live.test.ts
 
 help:
 	@printf '%s\n' \
@@ -61,6 +74,8 @@ help:
 	  'make commitlint     Check a commit message from stdin' \
 	  'make commits-check Validate history after adoption of Conventional Commits' \
 	  'make workflows-check  Validate CI and release workflows with actionlint'
+	@printf '%s\n' 'make generate       Generate OpenAPI, frontend SDK and Go server from TypeSpec in Docker'
+	@printf '%s\n' 'make api-smoke      Check SDK against running frontend/backend (make up first)'
 
 config:
 	$(COMPOSE) config --quiet

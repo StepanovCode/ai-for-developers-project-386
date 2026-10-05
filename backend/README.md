@@ -1,9 +1,11 @@
 # Backend
 
 Go-приложение с Gin. Точка входа — `cmd/api/main.go`, HTTP-роутер —
-`internal/api/router.go`. Единственный маршрут `GET /api/health` возвращает
-HTTP 200, `Content-Type: application/json; charset=utf-8` и `{"status":"ok"}`.
-Будущие бизнес-слои содержат только описание ответственности.
+`internal/api/router.go`. `GET /api/health` через generated strict handler
+возвращает HTTP 200, `Content-Type: application/json` и `{"status":"ok"}`.
+Остальные семь маршрутов описаны контрактом и зарегистрированы, но пока
+возвращают 500 после проверки входа: бизнес-сценарии ещё не реализованы.
+[Контракт и генерация](../api/README.md) запускаются через `make generate`.
 
 ```sh
 make build
@@ -39,7 +41,8 @@ idle — 60 секунд. SIGINT/SIGTERM запускают graceful shutdown с
 ## Проверки
 
 `make backend-test` запускает `go test ./...`: дымовой тест использует реальный
-роутер и `httptest`, проверяет статус, заголовок и тело health endpoint.
+роутер и `httptest`, проверяет health, валидацию, нормализацию строк, время
+с явным смещением, адаптацию ошибок и panic без раскрытия внутренних деталей.
 `make backend-lint` запускает закреплённый golangci-lint; `make backend-format-check`
 проверяет gofmt без записи. Исправления: `make backend-format` и
 `make backend-lint-fix`. Сборка, тесты и линтер используют модули в режиме

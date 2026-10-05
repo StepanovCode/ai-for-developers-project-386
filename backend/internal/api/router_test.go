@@ -1,6 +1,8 @@
 package api_test
 
 import (
+	"encoding/json"
+	"mime"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -16,10 +18,14 @@ func TestHealth(t *testing.T) {
 	if response.Code != http.StatusOK {
 		t.Fatalf("status = %d, want %d", response.Code, http.StatusOK)
 	}
-	if got := response.Header().Get("Content-Type"); got != "application/json; charset=utf-8" {
+	if got, _, _ := mime.ParseMediaType(response.Header().Get("Content-Type")); got != "application/json" {
 		t.Errorf("Content-Type = %q, want JSON", got)
 	}
-	if got := response.Body.String(); got != `{"status":"ok"}` {
-		t.Errorf("body = %q, want {\"status\":\"ok\"}", got)
+	var body map[string]string
+	if err := json.Unmarshal(response.Body.Bytes(), &body); err != nil {
+		t.Fatal(err)
+	}
+	if len(body) != 1 || body["status"] != "ok" {
+		t.Errorf("body = %v, want status=ok", body)
 	}
 }
