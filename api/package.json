@@ -1,0 +1,26 @@
+{
+  "name": "na-svyazi-api-contract",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": "24.21.0",
+    "npm": "11.19.0"
+  },
+  "packageManager": "npm@11.19.0",
+  "scripts": {
+    "generate:openapi": "tsp compile . --warn-as-error && node normalize-openapi.mjs",
+    "generate:sdk": "openapi-ts"
+  },
+  "overrides": {
+    "js-yaml": "4.3.2",
+    "undici": "7.30.0"
+  },
+  "devDependencies": {
+    "@hey-api/openapi-ts": "0.99.0",
+    "@typespec/compiler": "1.16.0",
+    "@typespec/http": "1.16.0",
+    "@typespec/openapi": "1.16.0",
+    "@typespec/openapi3": "1.16.0",
+    "typescript": "6.0.2"
+  }
+}

@@ -94,6 +94,7 @@ make app-build
 
 ## Документация
 
+- [API: TypeSpec, генерация SDK/Go, форматы и команды](api/README.md).
 - [Окружение Docker: команды, кеши, порты и очистка](docs/docker.md).
 - [Frontend: структура, shadcn/ui и команды](frontend/README.md).
 - [Backend: запуск, конфигурация и health endpoint](backend/README.md).
