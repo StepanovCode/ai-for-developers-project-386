@@ -78,9 +78,11 @@
 **Requirements:** GitHub issue #20 плюс Spec и Global Constraints.
 **Files:** usecase/meetings.go; repo meetings read; api/meetings.go; frontend admin meetings page и тесты.
 **Interfaces:** Использует общий booking repo, Clock и owner; GET /api/meetings возвращает все типы startsAt > now, сортировка ближайшие сверху, без 14-дневного ограничения.
-- [ ] Написать падающие Go/БД/UI тесты времени, сортировки, разных типов, встреч вне 14 дней, обновления и исчезновения при начале.
-- [ ] Реализовать API/экран, обновление при открытии/возврате во вкладку/по кнопке; таймер убирает начавшееся, не удаляя запись.
-- [ ] Проверить make check, DB integration, полный путь владельца/гостя и ручную доступность; обновить project-plan.
-- [ ] Провести self-review, commitlint, создать feat(meetings): list upcoming meetings for owner, commits-check.
+- [x] Написать Go/UI RED и БД characterization-тесты времени, сортировки, разных типов, встреч вне 14 дней, обновления и исчезновения при начале.
+- [x] Реализовать API/экран, обновление при открытии/возврате во вкладку/по кнопке; таймер убирает начавшееся, не удаляя запись.
+- [x] Проверить make check, DB integration, полный HTTP путь владельца/гостя; обновить project-plan.
+- [ ] Завершить ручную приёмку контроллером; native browser zoom 200% и GitHub CI остаются непроверенными.
+- [x] Провести self-review и commitlint; подготовить feat(meetings): list upcoming meetings for owner.
+- [x] Проверить commits-check после коммита: 0 problems/warnings; результат в task-5-report.
 
 После каждой задачи контроллер делает независимое ревью спецификации и качества; замечания исправляются до перехода к следующей. В конце — общее ревью ветки и итоговый make check. GitHub CI нового кода без push непроверен.

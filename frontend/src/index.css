@@ -593,3 +593,16 @@ a:focus-visible {
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+.meeting-list {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 1rem;
+}
+.meeting-list li {
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  padding: 1.25rem;
+  overflow-wrap: anywhere;
+}

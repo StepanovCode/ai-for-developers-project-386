@@ -252,6 +252,7 @@ test('event details load failure is explicit and can retry without losing input'
 })
 
 test('booking links remain SPA navigation and preserve draft through catalog and type changes', async () => {
+  const secondId = '00000000-0000-4000-8000-000000000003'
   const fetch = resilientTransport(unavailable)
   const implementation = fetch.getMockImplementation()!
   fetch.mockImplementation(async (r) =>
@@ -259,21 +260,37 @@ test('booking links remain SPA navigation and preserve draft through catalog and
       ? new Response(
           JSON.stringify({
             owner: confirmation.owner,
-            items: [{ id, name: 'Разговор', description: 'Описание', durationMinutes: 30 }],
+            items: [
+              { id: secondId, name: 'Другой тип', description: 'Описание', durationMinutes: 30 },
+            ],
           }),
           { headers: { 'Content-Type': 'application/json' } },
         )
-      : implementation(r),
+      : new URL(r.url).pathname === `/api/event-types/${secondId}`
+        ? new Response(
+            JSON.stringify({
+              owner: confirmation.owner,
+              eventType: {
+                id: secondId,
+                name: 'Другой тип',
+                description: 'Описание',
+                durationMinutes: 30,
+              },
+            }),
+            { headers: { 'Content-Type': 'application/json' } },
+          )
+        : implementation(r),
   )
   await filledForm()
   fireEvent.click(screen.getByRole('button', { name: 'Назад' }))
   fireEvent.click(await screen.findByRole('link', { name: 'К каталогу' }))
   expect(await screen.findByRole('heading', { name: 'Выберите тип события' })).toHaveFocus()
-  fireEvent.click(await screen.findByRole('link', { name: /Разговор/ }))
+  fireEvent.click(await screen.findByRole('link', { name: /Другой тип/ }))
   fireEvent.click(await screen.findByRole('button', { name: '10:00–10:30 — Свободно' }))
   fireEvent.click(screen.getByRole('button', { name: 'Продолжить' }))
   expect(await screen.findByLabelText('Имя')).toHaveValue('Сохранён')
   expect(screen.getByLabelText('Email')).toHaveValue('keep@example.com')
+  expect(window.location.pathname).toBe(`/book/${secondId}/details`)
 })
 test('double submit sends one POST and late success cannot navigate after details URL changes', async () => {
   let resolve!: (r: Response) => void

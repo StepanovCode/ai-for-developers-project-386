@@ -53,7 +53,7 @@ func TestPostgresBookingLifecycleAndConflicts(t *testing.T) {
 	now := time.Date(2026, 10, 7, 5, 0, 0, 0, time.UTC)
 	clock := func() time.Time { return now }
 	makeRouter := func(database *repo.Postgres) http.Handler {
-		return api.NewRouterWithBookings(usecase.NewEvents(database, "Owner"), usecase.NewSlots(database, domain.DefaultSchedule(), clock), usecase.NewBookings(database, domain.DefaultSchedule(), clock))
+		return api.NewRouterWithMeetings(usecase.NewEvents(database, "Owner"), usecase.NewSlots(database, domain.DefaultSchedule(), clock), usecase.NewBookings(database, domain.DefaultSchedule(), clock), usecase.NewMeetings(database, clock))
 	}
 	router := makeRouter(db)
 	request := func(r http.Handler, method, path, body string) *httptest.ResponseRecorder {
@@ -91,6 +91,14 @@ func TestPostgresBookingLifecycleAndConflicts(t *testing.T) {
 	var confirmation generated.BookingConfirmation
 	if err = json.Unmarshal(r.Body.Bytes(), &confirmation); err != nil {
 		t.Fatal(err)
+	}
+	meetings := request(router, "GET", "/api/meetings", "")
+	var listed generated.MeetingList
+	if meetings.Code != 200 {
+		t.Fatalf("meetings %d %s", meetings.Code, meetings.Body.String())
+	}
+	if err = json.Unmarshal(meetings.Body.Bytes(), &listed); err != nil || len(listed.Items) != 1 || listed.Items[0].Id != confirmation.Id || listed.Items[0].GuestName != "PRIVATE GUEST" || string(listed.Items[0].GuestEmail) != "private@example.com" {
+		t.Fatalf("owner lifecycle %v %v", listed, err)
 	}
 	post := r.Body.String()
 	if strings.Contains(post, "PRIVATE") || strings.Contains(post, "private@example.com") {

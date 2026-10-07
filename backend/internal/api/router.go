@@ -60,3 +60,7 @@ func newRouter(handler generated.StrictServerInterface) http.Handler {
 	})
 	return router
 }
+
+func NewRouterWithMeetings(events *usecase.Events, slots *usecase.Slots, bookings *usecase.Bookings, meetings *usecase.Meetings) http.Handler {
+	return newRouter(server{events: events, slots: slots, bookings: bookings, meetings: meetings})
+}

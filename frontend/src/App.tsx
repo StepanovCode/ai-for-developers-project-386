@@ -1,7 +1,8 @@
 import { ArrowRight, CalendarDays, Clock3, PhoneCall, UserRoundCheck } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useEffect, useState } from 'react'
-import { AdminNav, CreateEventPage, EventsPage } from './events'
+import { CreateEventPage, EventsPage } from './events'
+import { MeetingsPage } from './meetings'
 import { SlotsPage } from './slots'
 import { BookingForm, ConfirmationPage, type GuestDraft } from './bookings'
 import { ServiceStatus } from '@/components/service-status'
@@ -122,16 +123,7 @@ function App() {
         }}
       />
     )
-  else if (path === '/admin/meetings')
-    page = (
-      <main className="page-surface">
-        <section className="site-container catalog-page">
-          <AdminNav />
-          <h1 tabIndex={-1}>Предстоящие встречи</h1>
-          <p>Список встреч появится в следующем этапе.</p>
-        </section>
-      </main>
-    )
+  else if (path === '/admin/meetings') page = <MeetingsPage />
   else
     page = (
       <main className="page-surface">
