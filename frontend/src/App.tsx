@@ -79,16 +79,20 @@ function HomePage() {
 
 function App() {
   const [path, setPath] = useState(window.location.pathname.replace(/\/$/, '') || '/')
+  const [search, setSearch] = useState(window.location.search)
   const [notice, setNotice] = useState('')
   const [draft, setDraft] = useState<GuestDraft>({ name: '', email: '' })
   useEffect(() => {
-    const onPop = () => setPath(window.location.pathname.replace(/\/$/, '') || '/')
+    const onPop = () => {
+      setPath(window.location.pathname.replace(/\/$/, '') || '/')
+      setSearch(window.location.search)
+    }
     window.addEventListener('popstate', onPop)
     return () => window.removeEventListener('popstate', onPop)
   }, [])
   useEffect(() => {
     document.querySelector<HTMLElement>('main h1')?.focus()
-  }, [path])
+  }, [path, search])
   const type = /^\/book\/([^/]+)$/.exec(path)
   let page
   if (path === '/') page = <HomePage />
@@ -97,7 +101,7 @@ function App() {
   else if (/^\/book\/[^/]+\/details$/.test(path))
     page = (
       <BookingForm
-        key={path}
+        key={path + search}
         id={path.split('/')[2]}
         draft={draft}
         onDraft={setDraft}
@@ -138,11 +142,31 @@ function App() {
       </main>
     )
   return (
-    <>
+    <div
+      onClick={(event) => {
+        if (
+          event.defaultPrevented ||
+          event.button !== 0 ||
+          event.metaKey ||
+          event.ctrlKey ||
+          event.shiftKey ||
+          event.altKey
+        )
+          return
+        const link = (event.target as HTMLElement).closest('a')
+        if (!link || link.target || link.hasAttribute('download')) return
+        const url = new URL(link.href, window.location.origin)
+        if (url.origin !== window.location.origin || !/^\/book(?:ings)?(?:\/|$)/.test(url.pathname))
+          return
+        event.preventDefault()
+        window.history.pushState({}, '', url)
+        window.dispatchEvent(new PopStateEvent('popstate'))
+      }}
+    >
       <SiteHeader />
       <ServiceStatus />
       {page}
-    </>
+    </div>
   )
 }
 

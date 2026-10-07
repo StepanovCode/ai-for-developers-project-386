@@ -2,8 +2,8 @@ import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { createBooking, getBooking, getEventType } from './api/generated/sdk.gen'
 import type { BookingConfirmation, EventTypeDetails } from './api/generated/types.gen'
 export type GuestDraft = { name: string; email: string }
-function navigate(url: string) {
-  window.history.pushState({}, '', url)
+function navigate(url: string, state = {}) {
+  window.history.pushState(state, '', url)
   window.dispatchEvent(new PopStateEvent('popstate'))
 }
 function displayTime(value: string) {
@@ -37,6 +37,10 @@ export function BookingForm({
   const [message, setMessage] = useState('')
   const [fields, setFields] = useState<Record<string, string[]>>({})
   const [pending, setPending] = useState(false)
+  const [attempt, setAttempt] = useState(0)
+  const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState('')
+  const submission = useRef<AbortController | null>(null)
   const form = useRef<HTMLFormElement>(null)
   const active = useRef(true)
   const slot = new URLSearchParams(window.location.search).get('slot') ?? ''
@@ -51,39 +55,52 @@ export function BookingForm({
         if (!loadActive || controller.signal.aborted) return
         if (r.data) {
           setData(r.data)
-          setMessage('')
+          setLoadError('')
         } else
-          setMessage(
+          setLoadError(
             r.response?.status === 404
               ? 'Тип события не найден'
               : 'Не удалось загрузить тип события',
           )
       })
       .catch(() => {
-        if (loadActive && !controller.signal.aborted) setMessage('Не удалось загрузить тип события')
+        if (loadActive && !controller.signal.aborted)
+          setLoadError('Не удалось загрузить тип события')
+      })
+      .finally(() => {
+        if (loadActive && !controller.signal.aborted) setLoading(false)
       })
     return () => {
+      submission.current?.abort()
+      submission.current = null
       loadActive = false
       active.current = false
       controller.abort()
     }
-  }, [id])
+  }, [id, attempt])
   async function submit(e: FormEvent) {
     e.preventDefault()
-    if (pending || !data || !validSlot) return
+    if (submission.current || pending || loading || loadError || !data || !validSlot) return
+    const controller = new AbortController()
+    submission.current = controller
     setPending(true)
     setFields({})
     setMessage('')
     try {
       const r = await createBooking({
         baseUrl: window.location.origin,
+        signal: controller.signal,
         body: { eventTypeId: id, startsAt: slot, guestName: draft.name, guestEmail: draft.email },
       })
-      if (!active.current) return
+      if (!active.current || controller.signal.aborted || submission.current !== controller) return
       if (r.data) {
         onSuccess()
         navigate(`/bookings/${r.data.id}`)
       } else {
+        if (r.response?.status === 400 && r.error?.code === 'SLOT_UNAVAILABLE') {
+          navigate(`/book/${id}?${new URLSearchParams({ date })}`, { slotUnavailable: true })
+          return
+        }
         if (r.error && 'fieldErrors' in r.error) {
           setFields(r.error.fieldErrors ?? {})
           const first = ['guestName', 'guestEmail'].find(
@@ -93,12 +110,20 @@ export function BookingForm({
             form.current?.querySelector<HTMLElement>(`[name="${first}"]`)?.focus(),
           )
         }
-        setMessage(r.error?.message ?? 'Не удалось узнать результат. Повторите попытку')
+        setMessage(
+          r.response
+            ? (r.error?.message ?? 'Не удалось узнать результат. Повторите попытку')
+            : 'Не удалось узнать результат. Повторите попытку',
+        )
       }
     } catch {
-      if (active.current) setMessage('Не удалось узнать результат. Повторите попытку')
+      if (active.current && !controller.signal.aborted)
+        setMessage('Не удалось узнать результат. Повторите попытку')
     } finally {
-      if (active.current) setPending(false)
+      if (submission.current === controller) {
+        submission.current = null
+        if (active.current) setPending(false)
+      }
     }
   }
   return (
@@ -113,6 +138,23 @@ export function BookingForm({
             )}{' '}
             · Europe/Moscow · {data.owner.name}
           </p>
+        )}
+        {loading && <p role="status">Загрузка типа события…</p>}
+        {loadError && (
+          <div role="alert">
+            <p>{loadError}</p>
+            {loadError !== 'Тип события не найден' && (
+              <button
+                onClick={() => {
+                  setLoading(true)
+                  setLoadError('')
+                  setAttempt(attempt + 1)
+                }}
+              >
+                Повторить
+              </button>
+            )}
+          </div>
         )}
         {!validSlot && <p role="alert">Выберите время встречи</p>}
         {message && <p role="alert">{message}</p>}
@@ -146,7 +188,11 @@ export function BookingForm({
           >
             Назад
           </button>
-          <button className="primary-link" disabled={pending || !data || !validSlot} type="submit">
+          <button
+            className="primary-link"
+            disabled={pending || loading || !!loadError || !data || !validSlot}
+            type="submit"
+          >
             {pending ? 'Сохраняем…' : 'Забронировать'}
           </button>
         </form>

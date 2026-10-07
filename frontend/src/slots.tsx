@@ -33,7 +33,9 @@ export function SlotsPage({ id }: { id: string }) {
   const [month, setMonth] = useState('')
   const [selected, setSelected] = useState('')
   const [checking, setChecking] = useState(false)
-  const [notice, setNotice] = useState('')
+  const [notice, setNotice] = useState(() =>
+    window.history.state?.slotUnavailable ? 'Это время уже занято. Выберите другой слот' : '',
+  )
   const heading = useRef<HTMLHeadingElement>(null)
   const timesHeading = useRef<HTMLHeadingElement>(null)
   const availabilityCheck = useRef<AbortController | null>(null)

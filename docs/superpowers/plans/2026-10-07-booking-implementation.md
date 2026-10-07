@@ -32,7 +32,7 @@
 
 ### Task 1: Ticket 16 — Создание типа события и публичный каталог
 
-**Requirements:** /tmp/booking-ticket-16.md плюс Spec и Global Constraints.
+**Requirements:** GitHub issue #16 плюс Spec и Global Constraints.
 **Files:** domain/event.go; usecase/events.go; repo/postgres.go и migrations/001; api/events.go; config и cmd/api; compose.yaml, Makefile, CI; frontend pages каталога, типа, admin/form, общие routing/API утилиты и UI стили; README.
 **Interfaces:** repo удовлетворяет EventRepository из usecase; api.NewRouterWithApplication внедряет usecase, NewRouter сохраняется для boundary-тестов; frontend API использует поля generated models без дублирования контракта. Интерфейсы реально созданные в этом тикете фиксируются в отчёте для следующего.
 - [ ] Написать и запустить падающие HTTP/БД и UI тесты для create/list/get, trim, 422/404, пустого списка и сохранности.
@@ -43,7 +43,7 @@
 
 ### Task 2: Ticket 17 — Календарь и выбор доступного слота
 
-**Requirements:** /tmp/booking-ticket-17.md плюс Spec и Global Constraints.
+**Requirements:** GitHub issue #17 плюс Spec и Global Constraints.
 **Files:** domain/schedule.go; config/schedule.go; usecase/slots.go; repo booking read и migration; api/slots.go; frontend calendar/date/slot pages; тесты и документация.
 **Interfaces:** Использует EventRepository предыдущего тикета; Clock func() time.Time передаётся usecase для детерминированных проверок. Repository читает интервалы всех типов владельца. Slots возвращает generated SlotWindow только через api mapping.
 - [ ] Написать падающие тесты 14 дат, полуночи, 30 минут, сетки, длительности, рабочих интервалов, занятости разных типов и стыков; UI выбор/прямые ссылки/состояния.
@@ -54,7 +54,7 @@
 
 ### Task 3: Ticket 18 — Бронирование и подтверждение
 
-**Requirements:** /tmp/booking-ticket-18.md плюс Spec и Global Constraints.
+**Requirements:** GitHub issue #18 плюс Spec и Global Constraints.
 **Files:** domain/booking.go; usecase/bookings.go; repo booking insert/read и migration ограничения; api/bookings.go; frontend booking form/confirmation; интеграционные HTTP/БД и UI тесты.
 **Interfaces:** Использует Clock/расписание и правила слотов Task 2. Репозиторий транзакционно сохраняет снимок типа и интервалы; exclusion constraint для owner + tstzrange '[)' превращается в domain конфликт. Подтверждение не содержит контактов.
 - [ ] Написать падающие тесты полного create→slots→book→confirmation, пересечений разных типов/стыков/двух конкурентных HTTP запросов/повторной проверки времени и UI успеха.
@@ -65,7 +65,7 @@
 
 ### Task 4: Ticket 19 — Обработка устаревшего слота и сетевых ошибок
 
-**Requirements:** /tmp/booking-ticket-19.md плюс Spec и Global Constraints.
+**Requirements:** GitHub issue #19 плюс Spec и Global Constraints.
 **Files:** frontend booking flow/form/API error helpers и UI тесты.
 **Interfaces:** Использует API/страницы Task 3; 400 SLOT_UNAVAILABLE сбрасывает слот, сохраняет контактный draft только в памяти, обновляет slots. Сетевой POST не повторяется автоматически.
 - [ ] Написать падающие UI тесты сохранения контактов, сброса слота, обновления вариантов, возврата, неизвестного результата и ручного повтора.
@@ -75,7 +75,7 @@
 
 ### Task 5: Ticket 20 — Предстоящие встречи владельца
 
-**Requirements:** /tmp/booking-ticket-20.md плюс Spec и Global Constraints.
+**Requirements:** GitHub issue #20 плюс Spec и Global Constraints.
 **Files:** usecase/meetings.go; repo meetings read; api/meetings.go; frontend admin meetings page и тесты.
 **Interfaces:** Использует общий booking repo, Clock и owner; GET /api/meetings возвращает все типы startsAt > now, сортировка ближайшие сверху, без 14-дневного ограничения.
 - [ ] Написать падающие Go/БД/UI тесты времени, сортировки, разных типов, встреч вне 14 дней, обновления и исчезновения при начале.

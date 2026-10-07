@@ -239,3 +239,87 @@ test.each([
     ).not.toBeInTheDocument()
   }
 })
+
+test.each(['notice', 'window'])(
+  'fresh check clears slot removed by %s expiry without choosing replacement',
+  async (reason) => {
+    setup()
+    const original = globalThis.fetch
+    let reads = 0
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (r: Request) => {
+        if (new URL(r.url).pathname.endsWith('/slots') && ++reads > 1)
+          return response({
+            windowStart: reason === 'window' ? '2026-10-31' : '2026-10-30',
+            windowEnd: '2026-11-13',
+            timeZone: 'Europe/Moscow',
+            days:
+              reason === 'window'
+                ? [
+                    {
+                      date: '2026-10-31',
+                      slots: [
+                        {
+                          ...available,
+                          startsAt: '2026-10-31T06:00:00Z',
+                          endsAt: '2026-10-31T06:30:00Z',
+                        },
+                      ],
+                    },
+                  ]
+                : [
+                    {
+                      date: '2026-10-30',
+                      slots: [
+                        {
+                          ...available,
+                          startsAt: '2026-10-30T07:00:00Z',
+                          endsAt: '2026-10-30T07:30:00Z',
+                        },
+                      ],
+                    },
+                  ],
+          })
+        return original(r)
+      }),
+    )
+    render(<App />)
+    fireEvent.click(await screen.findByRole('button', { name: '09:00–09:30 — Свободно' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Продолжить' }))
+    expect(await screen.findByText('Это время уже занято. Выберите другой слот')).toBeVisible()
+    expect(screen.getByRole('button', { name: 'Продолжить' })).toBeDisabled()
+    expect(screen.queryByText(/^Выбрано:/)).not.toBeInTheDocument()
+    expect(new URLSearchParams(window.location.search).get('date')).toBe(
+      reason === 'window' ? '2026-10-31' : '2026-10-30',
+    )
+  },
+)
+
+test('availability transport failure retains explicit selection and repeat checks again', async () => {
+  setup()
+  const original = globalThis.fetch
+  let reads = 0
+  vi.stubGlobal(
+    'fetch',
+    vi.fn(async (r: Request) => {
+      if (new URL(r.url).pathname.endsWith('/slots') && ++reads === 2)
+        throw new TypeError('offline')
+      return original(r)
+    }),
+  )
+  render(<App />)
+  fireEvent.click(await screen.findByRole('button', { name: '09:00–09:30 — Свободно' }))
+  fireEvent.click(screen.getByRole('button', { name: 'Продолжить' }))
+  expect(
+    await screen.findByText('Не удалось проверить доступность. Повторите попытку'),
+  ).toBeVisible()
+  expect(screen.getByRole('button', { name: '09:00–09:30 — Свободно' })).toHaveAttribute(
+    'aria-pressed',
+    'true',
+  )
+  expect(screen.queryByText('На эту дату нет свободного времени')).not.toBeInTheDocument()
+  fireEvent.click(screen.getByRole('button', { name: 'Продолжить' }))
+  expect(await screen.findByRole('heading', { name: 'Данные гостя' })).toHaveFocus()
+  expect(reads).toBe(3)
+})
