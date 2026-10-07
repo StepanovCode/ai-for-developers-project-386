@@ -169,34 +169,27 @@ h1:focus {
   gap: 2rem;
 }
 
-.header-link {
-  color: var(--muted-foreground);
-  font-size: 0.875rem;
-  font-weight: 600;
-  text-decoration: none;
-  transition: color 150ms ease;
-}
-
-.header-link:hover {
-  color: var(--primary);
-}
-
-.header-booking[data-slot='button'] {
+.header-admin[data-slot='button'] {
   height: 2.75rem;
   gap: 0.65rem;
   padding-inline: 1.15rem;
-  color: var(--foreground);
-  background: #fff;
-  border-color: var(--border);
   border-radius: 0.75rem;
   font-size: 0.875rem;
   font-weight: 650;
-  box-shadow: 0 2px 4px #27396903;
+  text-decoration: none;
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease;
 }
 
-.header-booking[data-slot='button']:hover {
-  background: var(--secondary);
-  border-color: #ccd3f6;
+@media (prefers-reduced-motion: no-preference) and (hover: hover) {
+  .header-admin[data-slot='button']:hover {
+    transform: translateY(-2px);
+  }
+
+  .header-admin[data-slot='button']:active {
+    transform: translateY(0);
+  }
 }
 
 .page-surface {
@@ -406,7 +399,7 @@ h1:focus {
     gap: 1rem;
   }
 
-  .header-booking[data-slot='button'] {
+  .header-admin[data-slot='button'] {
     height: 2.5rem;
     padding-inline: 0.85rem;
   }
@@ -451,12 +444,11 @@ h1:focus {
     gap: 0.6rem;
   }
 
-  .header-link,
-  .header-booking[data-slot='button'] {
+  .header-admin[data-slot='button'] {
     font-size: 0.75rem;
   }
 
-  .header-booking[data-slot='button'] {
+  .header-admin[data-slot='button'] {
     gap: 0.35rem;
     padding-inline: 0.6rem;
   }

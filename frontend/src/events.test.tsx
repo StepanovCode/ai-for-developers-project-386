@@ -165,7 +165,10 @@ test('late create success keeps the catalog chosen while request was pending', a
   fireEvent.change(screen.getByLabelText('Описание'), { target: { value: 'Описание' } })
   fireEvent.click(screen.getByRole('button', { name: 'Создать тип' }))
   expect(screen.getByRole('button', { name: 'Создание…' })).toBeDisabled()
-  fireEvent.click(screen.getByRole('link', { name: 'Записаться' }))
+  act(() => {
+    window.history.pushState({}, '', '/book')
+    window.dispatchEvent(new PopStateEvent('popstate'))
+  })
   expect(await screen.findByText('Пока нет доступных типов событий')).toBeVisible()
   await act(async () => {
     complete(

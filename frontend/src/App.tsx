@@ -17,13 +17,8 @@ function SiteHeader() {
           <span>Meetly</span>
         </a>
         <nav className="header-nav" aria-label="Основная навигация">
-          <a className="header-link" href="/admin">
-            Админка
-          </a>
-          <Button asChild variant="outline" className="header-booking">
-            <a href="/book">
-              Записаться <ArrowRight size={17} aria-hidden="true" />
-            </a>
+          <Button asChild className="header-admin">
+            <a href="/admin">Админка</a>
           </Button>
         </nav>
       </div>

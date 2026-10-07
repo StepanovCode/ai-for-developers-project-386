@@ -35,14 +35,14 @@ test('приложение вызывает настоящий SDK и позво
   expect(new URL(request.url).pathname).toBe('/api/health')
 })
 
-test('главная показывает сервис и обе ссылки на запись', () => {
+test('главная показывает сервис и ссылку на запись', () => {
   window.history.replaceState({}, '', '/')
   render(<App />)
 
   expect(screen.getByRole('heading', { level: 1, name: 'Meetly' })).toBeVisible()
 
   const bookingLinks = screen.getAllByRole('link', { name: 'Записаться' })
-  expect(bookingLinks).toHaveLength(2)
+  expect(bookingLinks).toHaveLength(1)
   bookingLinks.forEach((link) => expect(link).toHaveAttribute('href', '/book'))
 })
 
