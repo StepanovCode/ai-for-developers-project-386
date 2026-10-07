@@ -218,7 +218,7 @@ commitlint:
 
 # Validate all commits since adoption; the original Hexlet history is excluded.
 commits-check:
-	$(RUN) tooling sh -ec 'baseline=$$(cat .commitlint-baseline); git merge-base --is-ancestor "$$baseline" HEAD; tools/node_modules/.bin/commitlint --config tools/commitlint.config.mjs --from "$$baseline" --to HEAD --verbose'
+	$(RUN) tooling sh tools/check-commits.sh
 
 workflows-check:
 	docker run --rm -v "$(CURDIR):/repo:ro" -w /repo rhysd/actionlint:1.7.12 -color .github/workflows/ci.yml .github/workflows/release-please.yml

@@ -62,6 +62,11 @@ make workflows-check
 Стандартные merge-коммиты игнорируются commitlint; в проекте используется squash.
 Проверка сообщения не создаёт коммит, а локальные Git hooks не устанавливаются.
 
+Единственное исключение в `tools/check-commits.sh` — SHA
+`0b291bb625a463c3176adfb7ebde249661a2bd51`: PR #22 уже был squash-merged
+с некорректным заголовком `feat/booking implementation (#22)`. Его история
+сохранена; остальные коммиты проверяются, включая новые с таким же заголовком.
+
 `.github/workflows/ci.yml` запускается на push и PR, в том числе при изменении
 заголовка PR. Независимые jobs:
 
@@ -112,6 +117,8 @@ workflows. Токен для MCP с Actions: read для этого не под�
    Fine-grained tokens создайте токен только для этого репозитория с ограниченным
    сроком действия. Repository permissions: Contents, Pull requests и Issues —
    Read and write. Issues нужен для меток release-please.
+   Для создания веток или тегов на коммитах, изменяющих `.github/workflows/`,
+   также может потребоваться Workflows — Read and write.
 2. В репозитории Settings → Secrets and variables → Actions → New repository
    secret сохраните токен под именем `RELEASE_PLEASE_TOKEN`.
 3. Проверьте, что GitHub Actions разрешён. Если используется политика разрешённых
