@@ -46,15 +46,8 @@ test('главная показывает сервис и обе ссылки н
   bookingLinks.forEach((link) => expect(link).toHaveAttribute('href', '/book'))
 })
 
-test.each(['/book', '/book/', '/book?from=home'])(
-  'адрес %s показывает заглушку записи и возврат на главную',
-  (path) => {
-    window.history.replaceState({}, '', path)
-    render(<App />)
-
-    expect(
-      screen.getByRole('heading', { level: 1, name: 'Онлайн-запись скоро появится' }),
-    ).toBeVisible()
-    expect(screen.getByRole('link', { name: 'На главную' })).toHaveAttribute('href', '/')
-  },
-)
+test('неизвестный маршрут показывает отдельное состояние', () => {
+  window.history.replaceState({}, '', '/unknown')
+  render(<App />)
+  expect(screen.getByRole('heading', { name: 'Страница не найдена' })).toBeVisible()
+})

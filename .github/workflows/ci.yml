@@ -34,6 +34,7 @@ jobs:
       - run: docker compose build backend
       - run: make backend-install
       - run: make backend-check
+      - run: make database-test
 
   commits:
     runs-on: ubuntu-24.04

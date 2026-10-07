@@ -1,7 +1,9 @@
 # Frontend
 
-Техническая стартовая страница Vite + React + TypeScript с Tailwind CSS 4 и
-компонентом Card из shadcn/ui. Бизнес-логики и запросов к backend пока нет.
+Приложение Vite + React + TypeScript с Tailwind CSS 4 и shadcn/ui.
+Главная, каталог `/book`, прямые страницы `/book/{id}` и открытая админка
+`/admin` используют сгенерированный SDK; создание типа — отдельная форма
+`/admin/event-types/new`.
 
 ## Запуск
 
@@ -30,7 +32,8 @@ make frontend-preview
 
 ## Структура и настройки
 
-- `src/App.tsx` — минимальная техническая страница.
+- `src/App.tsx` — главная и выбор страницы по адресу.
+- `src/events.tsx` — SDK-каталог, подробности типа и форма создания.
 - `src/components/ui/card.tsx` — исходный компонент shadcn/ui.
 - `src/lib/utils.ts` — утилита классов, созданная shadcn CLI.
 - `src/index.css` — Tailwind CSS и тема shadcn; шрифт поставляется локальным npm-пакетом.
@@ -52,7 +55,9 @@ make frontend-format-check
 ```
 
 Vitest использует jsdom, React Testing Library и jest-dom. Тест `src/App.test.tsx`
-проверяет видимый заголовок страницы; `npm test` выполняет `vitest run` без watch.
+проверяет health/главную/неизвестный маршрут; `src/events.test.tsx` проверяет
+каталог, пустое состояние, повтор загрузки, подробности, 404, сохранение ввода,
+ошибки у полей и фокус, создание через SDK и возврат к списку; `npm test` выполняет `vitest run` без watch.
 Для разработки: `make frontend-run CMD="npm run test:watch"`.
 ESLint проверяет TypeScript, правила React Hooks и Fast Refresh;
 `tsc -b` отдельно проверяет типы. Prettier проверяет файлы frontend, исключая

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/StepanovCode/ai-for-developers-project-386/backend/internal/usecase"
 	"github.com/gin-gonic/gin"
 	ginmiddleware "github.com/oapi-codegen/gin-middleware"
 
@@ -12,6 +13,10 @@ import (
 )
 
 func NewRouter() http.Handler { return newRouter(server{}) }
+
+func NewRouterWithApplication(events *usecase.Events) http.Handler {
+	return newRouter(server{events: events})
+}
 
 func newRouter(handler generated.StrictServerInterface) http.Handler {
 	spec, err := generated.GetSpec()

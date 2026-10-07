@@ -1,12 +1,7 @@
-import {
-  ArrowLeft,
-  ArrowRight,
-  CalendarDays,
-  Clock3,
-  PhoneCall,
-  UserRoundCheck,
-} from 'lucide-react'
+import { ArrowRight, CalendarDays, Clock3, PhoneCall, UserRoundCheck } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { useEffect, useState } from 'react'
+import { AdminNav, CreateEventPage, EventsPage } from './events'
 import { ServiceStatus } from '@/components/service-status'
 
 function SiteHeader() {
@@ -22,6 +17,9 @@ function SiteHeader() {
         <a className="header-link" href="/book">
           Записаться <ArrowRight size={17} aria-hidden="true" />
         </a>
+        <a className="header-link" href="/admin">
+          Админка
+        </a>
       </div>
     </header>
   )
@@ -33,10 +31,12 @@ function HomePage() {
       <div className="site-container hero-layout">
         <section className="hero-copy" aria-labelledby="home-title">
           <p className="eyebrow">Быстрая запись на звонок</p>
-          <h1 id="home-title">На связи</h1>
+          <h1 id="home-title" tabIndex={-1}>
+            На связи
+          </h1>
           <p className="hero-description">
-            Выберите удобное время и запишитесь на 30-минутный звонок. Просто, без регистрации и
-            лишней переписки.
+            Выберите тип встречи и удобное время. Забронируйте встречу без регистрации и лишней
+            переписки.
           </p>
           <a className="primary-link" href="/book">
             Записаться <ArrowRight size={20} aria-hidden="true" />
@@ -59,13 +59,13 @@ function HomePage() {
                 <span className="feature-icon" aria-hidden="true">
                   <Clock3 size={22} strokeWidth={1.9} />
                 </span>
-                <span>Звонки по 30 минут</span>
+                <span>Выбор типа встречи</span>
               </li>
               <li>
                 <span className="feature-icon" aria-hidden="true">
                   <UserRoundCheck size={22} strokeWidth={1.9} />
                 </span>
-                <span>Запись без регистрации</span>
+                <span>Бронирование без регистрации</span>
               </li>
             </ul>
           </CardContent>
@@ -75,40 +75,58 @@ function HomePage() {
   )
 }
 
-function BookingPlaceholder() {
-  return (
-    <main className="page-surface placeholder-surface">
-      <div className="site-container placeholder-layout">
-        <Card className="placeholder-card">
-          <CardHeader>
-            <span className="placeholder-icon" aria-hidden="true">
-              <CalendarDays size={28} strokeWidth={1.8} />
-            </span>
-            <CardTitle>
-              <h1>Онлайн-запись скоро появится</h1>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p>Мы готовим удобный способ выбрать время для звонка. Загляните позже.</p>
-            <a className="return-link" href="/">
-              <ArrowLeft size={18} aria-hidden="true" /> На главную
-            </a>
-          </CardContent>
-        </Card>
-      </div>
-    </main>
-  )
-}
-
 function App() {
-  const isBookingPage =
-    window.location.pathname === '/book' || window.location.pathname === '/book/'
-
+  const [path, setPath] = useState(window.location.pathname.replace(/\/$/, '') || '/')
+  const [notice, setNotice] = useState('')
+  useEffect(() => {
+    const onPop = () => setPath(window.location.pathname.replace(/\/$/, '') || '/')
+    window.addEventListener('popstate', onPop)
+    return () => window.removeEventListener('popstate', onPop)
+  }, [])
+  useEffect(() => {
+    document.querySelector<HTMLElement>('main h1')?.focus()
+  }, [path])
+  const type = /^\/book\/([^/]+)$/.exec(path)
+  let page
+  if (path === '/') page = <HomePage />
+  else if (path === '/book') page = <EventsPage />
+  else if (type) page = <EventsPage id={type[1]} />
+  else if (path === '/admin' || path === '/admin/event-types')
+    page = <EventsPage admin notice={notice} />
+  else if (path === '/admin/event-types/new')
+    page = (
+      <CreateEventPage
+        onCreated={() => {
+          window.history.pushState({}, '', '/admin')
+          setNotice('Тип события создан')
+          setPath('/admin')
+        }}
+      />
+    )
+  else if (path === '/admin/meetings')
+    page = (
+      <main className="page-surface">
+        <section className="site-container catalog-page">
+          <AdminNav />
+          <h1 tabIndex={-1}>Предстоящие встречи</h1>
+          <p>Список встреч появится в следующем этапе.</p>
+        </section>
+      </main>
+    )
+  else
+    page = (
+      <main className="page-surface">
+        <section className="site-container catalog-page">
+          <h1 tabIndex={-1}>Страница не найдена</h1>
+          <a href="/">На главную</a>
+        </section>
+      </main>
+    )
   return (
     <>
       <SiteHeader />
       <ServiceStatus />
-      {isBookingPage ? <BookingPlaceholder /> : <HomePage />}
+      {page}
     </>
   )
 }

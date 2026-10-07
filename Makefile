@@ -76,6 +76,7 @@ help:
 	  'make workflows-check  Validate CI and release workflows with actionlint'
 	@printf '%s\n' 'make generate       Generate OpenAPI, frontend SDK and Go server from TypeSpec in Docker'
 	@printf '%s\n' 'make api-smoke      Check SDK against running frontend/backend (make up first)'
+	@printf '%s\n' 'make migrate        Apply ordered PostgreSQL migrations (separate from API startup)' 'make database-test  Test HTTP/storage using isolated PostgreSQL database'
 
 config:
 	$(COMPOSE) config --quiet
@@ -88,6 +89,7 @@ start:
 	$(MAKE) build
 	$(MAKE) stop
 	$(MAKE) install
+	$(MAKE) migrate
 	$(MAKE) up
 	$(MAKE) ps
 
@@ -220,3 +222,17 @@ commits-check:
 
 workflows-check:
 	docker run --rm -v "$(CURDIR):/repo:ro" -w /repo rhysd/actionlint:1.7.12 -color .github/workflows/ci.yml .github/workflows/release-please.yml
+
+.PHONY: db-up migrate database-test
+
+db-up:
+	$(COMPOSE) up -d --wait postgres
+
+migrate: db-up
+	$(RUN) backend go run ./cmd/migrate
+
+# Test database is a distinct service with disposable storage. No production cleanup.
+database-test:
+	$(COMPOSE) --profile test up -d --wait postgres-test
+	$(RUN) -e DATABASE_URL=postgres://booking_test:booking_test@postgres-test:5432/booking_test?sslmode=disable backend go run ./cmd/migrate
+	$(RUN) -e TEST_DATABASE_URL=postgres://booking_test:booking_test@postgres-test:5432/booking_test?sslmode=disable backend go test -count=1 -tags integration ./...

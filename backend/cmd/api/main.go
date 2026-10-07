@@ -14,6 +14,8 @@ import (
 
 	"github.com/StepanovCode/ai-for-developers-project-386/backend/internal/api"
 	"github.com/StepanovCode/ai-for-developers-project-386/backend/internal/config"
+	"github.com/StepanovCode/ai-for-developers-project-386/backend/internal/repo"
+	"github.com/StepanovCode/ai-for-developers-project-386/backend/internal/usecase"
 )
 
 func main() {
@@ -33,9 +35,18 @@ func run(logger *slog.Logger) error {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
+	connectCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
+	database, err := repo.Open(connectCtx, cfg.DatabaseURL)
+	cancel()
+	if err != nil {
+		return err
+	}
+	defer database.Close()
+	application := usecase.NewEvents(database, cfg.OwnerName)
+
 	server := &http.Server{
 		Addr:              net.JoinHostPort("", cfg.Port),
-		Handler:           api.NewRouter(),
+		Handler:           api.NewRouterWithApplication(application),
 		ReadHeaderTimeout: 5 * time.Second,
 		ReadTimeout:       10 * time.Second,
 		WriteTimeout:      10 * time.Second,
