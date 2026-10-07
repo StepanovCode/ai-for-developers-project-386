@@ -1522,6 +1522,38 @@ Controller make generate прошёл без contract/generated diff; workflows-
 прошёл. Review19 minor cross-type draft уже исправлен настоящим вторым UUID
 в коммите #20. Остальные замечания итогового ревью исправляются отдельно.
 
+### Итоговая проверка реализации тикетов 16–20 — 2026-10-07
+
+main обновлён до c55f172; реализация выполнена субагентами в отдельной ветке
+codex/booking-implementation. После каждого тикета создан Conventional Commit;
+дополнительные коммиты исправляют замечания независимого ревью. Issue/PR/remote
+не изменялись, push и merge не выполнялись.
+
+Общее ревью подтвердило архитектуру, generated контракт/SDK, серверные правила,
+owner-wide PostgreSQL exclusion constraint и интеграционные проверки конфликтов.
+Найденные Important закрыты и проверены повторным scoped ревью: подтверждение
+получило ручной «Повторить» после network/500 (28ae098), форма создания типа —
+AbortController/request identity и синхронную защиту двойного POST (25392f7).
+RED тесты воспроизвели отсутствие retry, поздний возврат на /admin и двойной POST;
+focused GREEN прошёл. Исправление server-time/monotonic timer (0bf7654) также
+одобрено независимо. Открытых блокирующих замечаний ревью нет.
+
+После всех исправлений Docker make check прошёл: 55 frontend passed, 1 opt-in
+health skipped; Go unit/HTTP, lint/typecheck/format и обе сборки прошли.
+Опциональный live health затем отдельно проверен make api-smoke: 1 passed.
+make database-test прошёл с настоящим изолированным PostgreSQL: полный путь,
+конкурентные запросы, пересечения разных типов, стыки, правила времени, сохранность
+и owner-list. make workflows-check прошёл. make generate воспроизвёл OpenAPI,
+SDK и Go boundary без diff. git diff --check прошёл; workflow Хекслета,
+version.txt, CHANGELOG.md и generated contract не изменены.
+
+Применены миграции обычной пустой dev-БД и запущен make up с обычной конфигурацией.
+Ручные данные остаются только в отдельной booking_manual, тестовые — в
+postgres-test/booking_test; рабочая booking не наполнена фиктивными сущностями.
+Все пять тикетов реализованы локально; полной внешней приёмки не заявляем:
+GitHub Actions новых коммитов не запускался без push, native browser zoom 200%
+остаётся непроверенным (CSS zoom 2 и мобильная компоновка проверены).
+
 ## Официальные источники
 
 При реализации проверять актуальные инструкции и совместимость версий.

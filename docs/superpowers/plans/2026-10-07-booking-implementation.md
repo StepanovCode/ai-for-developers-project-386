@@ -8,7 +8,7 @@
 
 **Tech Stack:** Go/Gin, PostgreSQL/pgx, React/TypeScript/Vite, Docker Compose, Vitest/RTL, Go testing/httptest.
 
-**Spec:** ../specs/2026-10-07-booking-approved.md (утверждённая GitHub issue 14). Полные критерии отдельных тикетов сохранены контроллером в task briefs.
+**Spec:** ../specs/2026-10-07-booking-approved.md (утверждённая GitHub issue 14). Полные критерии отдельных тикетов находятся в соответствующих GitHub issues; результаты проверок записаны в docs/project-plan.md.
 
 ## Global Constraints
 
@@ -35,43 +35,43 @@
 **Requirements:** GitHub issue #16 плюс Spec и Global Constraints.
 **Files:** domain/event.go; usecase/events.go; repo/postgres.go и migrations/001; api/events.go; config и cmd/api; compose.yaml, Makefile, CI; frontend pages каталога, типа, admin/form, общие routing/API утилиты и UI стили; README.
 **Interfaces:** repo удовлетворяет EventRepository из usecase; api.NewRouterWithApplication внедряет usecase, NewRouter сохраняется для boundary-тестов; frontend API использует поля generated models без дублирования контракта. Интерфейсы реально созданные в этом тикете фиксируются в отчёте для следующего.
-- [ ] Написать и запустить падающие HTTP/БД и UI тесты для create/list/get, trim, 422/404, пустого списка и сохранности.
-- [ ] Реализовать PostgreSQL, последовательный migration runner, отдельную тестовую БД и Docker-команды; pgx закрепить совместимой версией.
-- [ ] Реализовать типы, SDK каталог, форму и прямые маршруты; обновить главную текстами спецификации.
-- [ ] Проверить make check, DB integration и ручную доступность/сохранность; обновить журнал project-plan.
-- [ ] Провести self-review, make commitlint, создать feat(events): add event types and public catalog, make commits-check.
+- [x] Написать и запустить падающие HTTP/БД и UI тесты для create/list/get, trim, 422/404, пустого списка и сохранности.
+- [x] Реализовать PostgreSQL, последовательный migration runner, отдельную тестовую БД и Docker-команды; pgx закрепить совместимой версией.
+- [x] Реализовать типы, SDK каталог, форму и прямые маршруты; обновить главную текстами спецификации.
+- [x] Проверить make check, DB integration и ручную доступность/сохранность; обновить журнал project-plan.
+- [x] Провести self-review, make commitlint, создать feat(events): add event types and public catalog, make commits-check.
 
 ### Task 2: Ticket 17 — Календарь и выбор доступного слота
 
 **Requirements:** GitHub issue #17 плюс Spec и Global Constraints.
 **Files:** domain/schedule.go; config/schedule.go; usecase/slots.go; repo booking read и migration; api/slots.go; frontend calendar/date/slot pages; тесты и документация.
 **Interfaces:** Использует EventRepository предыдущего тикета; Clock func() time.Time передаётся usecase для детерминированных проверок. Repository читает интервалы всех типов владельца. Slots возвращает generated SlotWindow только через api mapping.
-- [ ] Написать падающие тесты 14 дат, полуночи, 30 минут, сетки, длительности, рабочих интервалов, занятости разных типов и стыков; UI выбор/прямые ссылки/состояния.
-- [ ] Реализовать конфигурируемое расписание, вычисление и API слотов без гостевых контактов.
-- [ ] Реализовать календарь, выбор даты и явный выбор слота, клавиатуру и мобильную компоновку.
-- [ ] Проверить make check, DB integration, ручную доступность; обновить project-plan.
-- [ ] Провести self-review, commitlint, создать feat(slots): add calendar and slot availability, commits-check.
+- [x] Написать падающие тесты 14 дат, полуночи, 30 минут, сетки, длительности, рабочих интервалов, занятости разных типов и стыков; UI выбор/прямые ссылки/состояния.
+- [x] Реализовать конфигурируемое расписание, вычисление и API слотов без гостевых контактов.
+- [x] Реализовать календарь, выбор даты и явный выбор слота, клавиатуру и мобильную компоновку.
+- [x] Проверить make check, DB integration, ручную доступность; обновить project-plan.
+- [x] Провести self-review, commitlint, создать feat(slots): add calendar and slot availability, commits-check.
 
 ### Task 3: Ticket 18 — Бронирование и подтверждение
 
 **Requirements:** GitHub issue #18 плюс Spec и Global Constraints.
 **Files:** domain/booking.go; usecase/bookings.go; repo booking insert/read и migration ограничения; api/bookings.go; frontend booking form/confirmation; интеграционные HTTP/БД и UI тесты.
 **Interfaces:** Использует Clock/расписание и правила слотов Task 2. Репозиторий транзакционно сохраняет снимок типа и интервалы; exclusion constraint для owner + tstzrange '[)' превращается в domain конфликт. Подтверждение не содержит контактов.
-- [ ] Написать падающие тесты полного create→slots→book→confirmation, пересечений разных типов/стыков/двух конкурентных HTTP запросов/повторной проверки времени и UI успеха.
-- [ ] Реализовать серверную проверку всех правил, сохранение и 201, подтверждение и 404, безопасную 500 при недоступной БД.
-- [ ] Реализовать отдельную форму с повторной проверкой перед переходом, подтверждение по прямой ссылке/reload.
-- [ ] Проверить make check, DB integration и ручную сохранность/reload/доступность; обновить project-plan.
-- [ ] Провести self-review, commitlint, создать feat(bookings): add booking and confirmation with conflict protection, commits-check.
+- [x] Написать падающие тесты полного create→slots→book→confirmation, пересечений разных типов/стыков/двух конкурентных HTTP запросов/повторной проверки времени и UI успеха.
+- [x] Реализовать серверную проверку всех правил, сохранение и 201, подтверждение и 404, безопасную 500 при недоступной БД.
+- [x] Реализовать отдельную форму с повторной проверкой перед переходом, подтверждение по прямой ссылке/reload.
+- [x] Проверить make check, DB integration и ручную сохранность/reload/доступность; обновить project-plan.
+- [x] Провести self-review, commitlint, создать feat(bookings): add booking and confirmation with conflict protection, commits-check.
 
 ### Task 4: Ticket 19 — Обработка устаревшего слота и сетевых ошибок
 
 **Requirements:** GitHub issue #19 плюс Spec и Global Constraints.
 **Files:** frontend booking flow/form/API error helpers и UI тесты.
 **Interfaces:** Использует API/страницы Task 3; 400 SLOT_UNAVAILABLE сбрасывает слот, сохраняет контактный draft только в памяти, обновляет slots. Сетевой POST не повторяется автоматически.
-- [ ] Написать падающие UI тесты сохранения контактов, сброса слота, обновления вариантов, возврата, неизвестного результата и ручного повтора.
-- [ ] Реализовать требуемые сообщения, сохранение ввода при back/переходах, фокус и различимые loading/error/empty.
-- [ ] Проверить make check и ручной сценарий/прямые ссылки/доступность; обновить project-plan.
-- [ ] Провести self-review, commitlint, создать feat(bookings): recover selection after slot and network errors, commits-check.
+- [x] Написать падающие UI тесты сохранения контактов, сброса слота, обновления вариантов, возврата, неизвестного результата и ручного повтора.
+- [x] Реализовать требуемые сообщения, сохранение ввода при back/переходах, фокус и различимые loading/error/empty.
+- [x] Проверить make check и ручной сценарий/прямые ссылки/доступность; обновить project-plan.
+- [x] Провести self-review, commitlint, создать feat(bookings): recover selection after slot and network errors, commits-check.
 
 ### Task 5: Ticket 20 — Предстоящие встречи владельца
 
@@ -81,10 +81,12 @@
 - [x] Написать Go/UI RED и БД characterization-тесты времени, сортировки, разных типов, встреч вне 14 дней, обновления и исчезновения при начале.
 - [x] Реализовать API/экран, обновление при открытии/возврате во вкладку/по кнопке; таймер убирает начавшееся, не удаляя запись.
 - [x] Проверить make check, DB integration, полный HTTP путь владельца/гостя; обновить project-plan.
-- [ ] Завершить ручную приёмку контроллером; native browser zoom 200% и GitHub CI остаются непроверенными.
+- [ ] Завершить внешнюю приёмку: native browser zoom 200% и GitHub CI остаются непроверенными; доступные ручные сценарии контроллер проверил.
 - [x] Провести self-review и commitlint; подготовить feat(meetings): list upcoming meetings for owner.
 - [x] Проверить commits-check после коммита: 0 problems/warnings; результат в task-5-report.
 - [x] Исправить Important review20: server-time snapshot + monotonic expiry, skew/precision/missing-header tests.
-- [ ] Scoped независимое re-review исправления server clock (контроллер).
+- [x] Scoped независимое re-review исправления server clock (контроллер).
 
 После каждой задачи контроллер делает независимое ревью спецификации и качества; замечания исправляются до перехода к следующей. В конце — общее ревью ветки и итоговый make check. GitHub CI нового кода без push непроверен.
+
+Итог: реализация пяти тикетов и исправления ревью закоммичены; независимые scoped re-review закрыли все Important. Финальный make check: 55 frontend passed, 1 opt-in skipped (затем api-smoke отдельно passed), Go/линтеры/сборки passed; database-test и workflows-check passed. make generate воспроизводим без изменений contract/generated. Ветка сохранена локально, без push.
