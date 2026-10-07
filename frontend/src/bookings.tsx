@@ -203,6 +203,7 @@ export function BookingForm({
 export function ConfirmationPage({ id }: { id: string }) {
   const [data, setData] = useState<BookingConfirmation>()
   const [message, setMessage] = useState('Загружаем подтверждение…')
+  const [attempt, setAttempt] = useState(0)
   useEffect(() => {
     const c = new AbortController()
     let active = true
@@ -224,7 +225,7 @@ export function ConfirmationPage({ id }: { id: string }) {
       active = false
       c.abort()
     }
-  }, [id])
+  }, [id, attempt])
   useEffect(() => {
     document.querySelector<HTMLElement>('main h1')?.focus()
   }, [data, message])
@@ -232,6 +233,17 @@ export function ConfirmationPage({ id }: { id: string }) {
     <main className="page-surface">
       <section className="site-container catalog-page">
         <h1 tabIndex={-1}>{data ? 'Бронирование подтверждено' : message}</h1>
+        {!data && message === 'Не удалось загрузить подтверждение' && (
+          <button
+            type="button"
+            onClick={() => {
+              setMessage('Загружаем подтверждение…')
+              setAttempt((value) => value + 1)
+            }}
+          >
+            Повторить
+          </button>
+        )}
         {data && (
           <>
             <p>Номер бронирования: {data.id}</p>

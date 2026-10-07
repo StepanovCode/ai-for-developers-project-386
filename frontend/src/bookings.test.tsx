@@ -349,3 +349,64 @@ test('details loading is distinct from failure and prevents submitting', () => {
   expect(screen.getByRole('button', { name: 'Забронировать' })).toBeDisabled()
   expect(screen.queryByRole('alert')).not.toBeInTheDocument()
 })
+
+test.each(['network', '500'])(
+  'confirmation %s failure offers manual retry and loads success',
+  async (failure) => {
+    window.history.replaceState({}, '', `/bookings/${confirmation.id}`)
+    let attempts = 0
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (r: Request) => {
+        if (new URL(r.url).pathname === '/api/health')
+          return new Response(JSON.stringify({ status: 'ok' }), {
+            headers: { 'Content-Type': 'application/json' },
+          })
+        attempts++
+        if (attempts === 1) {
+          if (failure === 'network') throw new TypeError('network')
+          return new Response(
+            JSON.stringify({ code: 'INTERNAL_ERROR', message: 'Ошибка сервера' }),
+            { status: 500, headers: { 'Content-Type': 'application/json' } },
+          )
+        }
+        return new Response(JSON.stringify(confirmation), {
+          headers: { 'Content-Type': 'application/json' },
+        })
+      }),
+    )
+    render(<App />)
+    expect(
+      await screen.findByRole('heading', { name: 'Не удалось загрузить подтверждение' }),
+    ).toBeVisible()
+    expect(attempts).toBe(1)
+    fireEvent.click(screen.getByRole('button', { name: 'Повторить' }))
+    expect(await screen.findByRole('heading', { name: 'Бронирование подтверждено' })).toHaveFocus()
+    expect(attempts).toBe(2)
+    expect(screen.queryByRole('button', { name: 'Повторить' })).not.toBeInTheDocument()
+  },
+)
+
+test('confirmation 404 retains missing state without retry', async () => {
+  window.history.replaceState({}, '', `/bookings/${confirmation.id}`)
+  vi.stubGlobal(
+    'fetch',
+    vi.fn(
+      async (r: Request) =>
+        new Response(
+          JSON.stringify(
+            new URL(r.url).pathname === '/api/health'
+              ? { status: 'ok' }
+              : { code: 'NOT_FOUND', message: 'Бронирование не найдено' },
+          ),
+          {
+            status: new URL(r.url).pathname === '/api/health' ? 200 : 404,
+            headers: { 'Content-Type': 'application/json' },
+          },
+        ),
+    ),
+  )
+  render(<App />)
+  expect(await screen.findByRole('heading', { name: 'Бронирование не найдено' })).toHaveFocus()
+  expect(screen.queryByRole('button', { name: 'Повторить' })).not.toBeInTheDocument()
+})
