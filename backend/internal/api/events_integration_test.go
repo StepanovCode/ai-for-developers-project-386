@@ -29,11 +29,11 @@ func TestPostgresEventLifecycle(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer func() { _ = connection.Close(ctx) }()
-	if _, err = connection.Exec(ctx, `TRUNCATE event_types RESTART IDENTITY`); err != nil {
+	if _, err = connection.Exec(ctx, `TRUNCATE bookings, event_types RESTART IDENTITY`); err != nil {
 		t.Fatal(err)
 	}
 	defer func() {
-		if _, err := connection.Exec(ctx, `TRUNCATE event_types RESTART IDENTITY`); err != nil {
+		if _, err := connection.Exec(ctx, `TRUNCATE bookings, event_types RESTART IDENTITY`); err != nil {
 			t.Error(err)
 		}
 	}()

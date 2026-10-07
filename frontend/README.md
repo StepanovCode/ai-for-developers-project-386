@@ -84,3 +84,13 @@ make frontend-run CMD="npx --yes shadcn@4.21.0 add card --yes"
 [Официальная инструкция Vite](https://vite.dev/guide/) ·
 [shadcn/ui для Vite](https://ui.shadcn.com/docs/installation/vite) ·
 [Архитектура](../docs/architecture.md) · [Версии](../docs/toolchain.md)
+
+`src/slots.tsx` показывает сведения о типе, календарь и выбор времени в трёх
+колонках или вертикально на узком экране. Дату хранит query `date`; источник
+окна и доступности — SDK GET слотов, московские часы форматируются явно.
+Нативные кнопки доступны с клавиатуры; выбор даты фокусирует заголовок времени,
+слот выбирается отдельно. `src/slots.test.tsx` проверяет восстановление даты,
+границу месяцев, пустые/ошибочные состояния, выбор и повторную проверку.
+`bookingDetailsUrl` в `src/booking-navigation.ts` строит адрес отдельного шага
+`/book/{id}/details?date=…&slot=…`. Продолжение делает pushState + popstate,
+поэтому следующий тикет может сохранять draft в App без полной перезагрузки.

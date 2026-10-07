@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"github.com/StepanovCode/ai-for-developers-project-386/backend/internal/domain"
 	"os"
 	"strconv"
 )
@@ -10,6 +11,7 @@ type Config struct {
 	Port        string
 	DatabaseURL string
 	OwnerName   string
+	Schedule    domain.Schedule
 }
 
 func Load() (Config, error) {
@@ -29,5 +31,9 @@ func Load() (Config, error) {
 	if ownerName == "" {
 		ownerName = "Дмитрий Степанов"
 	}
-	return Config{Port: strconv.Itoa(number), DatabaseURL: databaseURL, OwnerName: ownerName}, nil
+	schedule, err := ParseSchedule(os.Getenv("WORK_SCHEDULE"))
+	if err != nil {
+		return Config{}, err
+	}
+	return Config{Schedule: schedule, Port: strconv.Itoa(number), DatabaseURL: databaseURL, OwnerName: ownerName}, nil
 }

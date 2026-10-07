@@ -506,3 +506,90 @@ a:focus-visible {
     gap: 1rem;
   }
 }
+
+.booking-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr) minmax(0, 1fr);
+  gap: 1.5rem;
+  align-items: start;
+}
+.booking-layout > section {
+  min-width: 0;
+}
+.booking-layout h1 {
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  margin-top: 0;
+}
+.booking-layout h2 {
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+}
+.calendar-panel,
+.times-panel {
+  background: white;
+  border: 1px solid #d4dbe7;
+  padding: 1rem;
+  border-radius: 1rem;
+}
+.window-caption {
+  font-size: 0.85rem;
+}
+.month-navigation {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-block: 1rem;
+}
+.month-navigation h3 {
+  text-align: center;
+}
+.month-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.25rem;
+}
+.weekday {
+  text-align: center;
+  font-size: 0.8rem;
+}
+.catalog-page .calendar-day {
+  padding: 0.35rem 0.05rem;
+  min-height: 3rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.calendar-day small {
+  font-size: 0.65rem;
+  white-space: nowrap;
+}
+.catalog-page button:disabled {
+  cursor: default;
+}
+.catalog-page [aria-pressed='true'] {
+  background: #dbeafe;
+  border-color: #215ed6;
+  color: #143773;
+}
+.slot-list {
+  display: grid;
+  gap: 0.5rem;
+  max-height: 32rem;
+  overflow-y: auto;
+  padding: 0.3rem;
+}
+.booking-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+@media (max-width: 1000px) {
+  .booking-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

@@ -2,6 +2,7 @@ import { ArrowRight, CalendarDays, Clock3, PhoneCall, UserRoundCheck } from 'luc
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useEffect, useState } from 'react'
 import { AdminNav, CreateEventPage, EventsPage } from './events'
+import { SlotsPage } from './slots'
 import { ServiceStatus } from '@/components/service-status'
 
 function SiteHeader() {
@@ -90,7 +91,17 @@ function App() {
   let page
   if (path === '/') page = <HomePage />
   else if (path === '/book') page = <EventsPage />
-  else if (type) page = <EventsPage id={type[1]} />
+  else if (type) page = <SlotsPage key={type[1]} id={type[1]} />
+  else if (/^\/book\/[^/]+\/details$/.test(path))
+    page = (
+      <main className="page-surface">
+        <section className="site-container catalog-page">
+          <h1 tabIndex={-1}>Данные гостя</h1>
+          <p>Форма бронирования появится в следующем этапе.</p>
+          <a href={path.replace('/details', '') + window.location.search}>Назад к выбору времени</a>
+        </section>
+      </main>
+    )
   else if (path === '/admin' || path === '/admin/event-types')
     page = <EventsPage admin notice={notice} />
   else if (path === '/admin/event-types/new')

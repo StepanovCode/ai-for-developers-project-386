@@ -14,8 +14,12 @@ import (
 
 func NewRouter() http.Handler { return newRouter(server{}) }
 
-func NewRouterWithApplication(events *usecase.Events) http.Handler {
-	return newRouter(server{events: events})
+func NewRouterWithApplication(events *usecase.Events, slots ...*usecase.Slots) http.Handler {
+	handler := server{events: events}
+	if len(slots) > 0 {
+		handler.slots = slots[0]
+	}
+	return newRouter(handler)
 }
 
 func newRouter(handler generated.StrictServerInterface) http.Handler {

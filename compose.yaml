@@ -107,6 +107,7 @@ services:
       PORT: "8080"
       DATABASE_URL: ${DATABASE_URL:-postgres://booking:booking@postgres:5432/booking?sslmode=disable}
       OWNER_NAME: ${OWNER_NAME:-Дмитрий Степанов}
+      WORK_SCHEDULE: ${WORK_SCHEDULE:-}
       GIN_MODE: release
       GOFLAGS: -mod=readonly
       GOMODCACHE: /go/pkg/mod
