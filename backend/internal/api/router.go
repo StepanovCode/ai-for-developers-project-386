@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/StepanovCode/ai-for-developers-project-386/backend/internal/usecase"
 	"github.com/gin-gonic/gin"
 	ginmiddleware "github.com/oapi-codegen/gin-middleware"
 
@@ -12,6 +13,18 @@ import (
 )
 
 func NewRouter() http.Handler { return newRouter(server{}) }
+
+func NewRouterWithApplication(events *usecase.Events, slots ...*usecase.Slots) http.Handler {
+	handler := server{events: events}
+	if len(slots) > 0 {
+		handler.slots = slots[0]
+	}
+	return newRouter(handler)
+}
+
+func NewRouterWithBookings(events *usecase.Events, slots *usecase.Slots, bookings *usecase.Bookings) http.Handler {
+	return newRouter(server{events: events, slots: slots, bookings: bookings})
+}
 
 func newRouter(handler generated.StrictServerInterface) http.Handler {
 	spec, err := generated.GetSpec()
@@ -46,4 +59,8 @@ func newRouter(handler generated.StrictServerInterface) http.Handler {
 		ErrorHandler: func(c *gin.Context, _ error, _ int) { writeError(c, validationError()) },
 	})
 	return router
+}
+
+func NewRouterWithMeetings(events *usecase.Events, slots *usecase.Slots, bookings *usecase.Bookings, meetings *usecase.Meetings) http.Handler {
+	return newRouter(server{events: events, slots: slots, bookings: bookings, meetings: meetings})
 }

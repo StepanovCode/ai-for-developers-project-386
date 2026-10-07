@@ -35,26 +35,19 @@ test('приложение вызывает настоящий SDK и позво
   expect(new URL(request.url).pathname).toBe('/api/health')
 })
 
-test('главная показывает сервис и обе ссылки на запись', () => {
+test('главная показывает сервис и ссылку на запись', () => {
   window.history.replaceState({}, '', '/')
   render(<App />)
 
-  expect(screen.getByRole('heading', { level: 1, name: 'На связи' })).toBeVisible()
+  expect(screen.getByRole('heading', { level: 1, name: 'Meetly' })).toBeVisible()
 
   const bookingLinks = screen.getAllByRole('link', { name: 'Записаться' })
-  expect(bookingLinks).toHaveLength(2)
+  expect(bookingLinks).toHaveLength(1)
   bookingLinks.forEach((link) => expect(link).toHaveAttribute('href', '/book'))
 })
 
-test.each(['/book', '/book/', '/book?from=home'])(
-  'адрес %s показывает заглушку записи и возврат на главную',
-  (path) => {
-    window.history.replaceState({}, '', path)
-    render(<App />)
-
-    expect(
-      screen.getByRole('heading', { level: 1, name: 'Онлайн-запись скоро появится' }),
-    ).toBeVisible()
-    expect(screen.getByRole('link', { name: 'На главную' })).toHaveAttribute('href', '/')
-  },
-)
+test('неизвестный маршрут показывает отдельное состояние', () => {
+  window.history.replaceState({}, '', '/unknown')
+  render(<App />)
+  expect(screen.getByRole('heading', { name: 'Страница не найдена' })).toBeVisible()
+})

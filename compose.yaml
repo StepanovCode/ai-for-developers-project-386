@@ -1,6 +1,35 @@
 name: ai-for-developers-project-386
 
 services:
+  postgres:
+    image: postgres:17.6-alpine
+    environment:
+      POSTGRES_USER: booking
+      POSTGRES_PASSWORD: booking
+      POSTGRES_DB: booking
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U booking -d booking"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+
+  postgres-test:
+    profiles: ["test"]
+    image: postgres:17.6-alpine
+    environment:
+      POSTGRES_USER: booking_test
+      POSTGRES_PASSWORD: booking_test
+      POSTGRES_DB: booking_test
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U booking_test -d booking_test"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+
   api-node:
     profiles: ["tools"]
     build:
@@ -70,9 +99,15 @@ services:
     working_dir: /workspace/backend
     init: true
     command: ["sh", "-c", "go build -o /tmp/api ./cmd/api && exec /tmp/api"]
+    depends_on:
+      postgres:
+        condition: service_healthy
     stop_grace_period: 10s
     environment:
       PORT: "8080"
+      DATABASE_URL: ${DATABASE_URL:-postgres://booking:booking@postgres:5432/booking?sslmode=disable}
+      OWNER_NAME: ${OWNER_NAME:-Дмитрий Степанов}
+      WORK_SCHEDULE: ${WORK_SCHEDULE:-}
       GIN_MODE: release
       GOFLAGS: -mod=readonly
       GOMODCACHE: /go/pkg/mod
@@ -86,6 +121,7 @@ services:
       - "127.0.0.1:${BACKEND_PORT:-8080}:8080"
 
 volumes:
+  postgres_data:
   api_node_modules:
   tooling_node_modules:
   frontend_node_modules:

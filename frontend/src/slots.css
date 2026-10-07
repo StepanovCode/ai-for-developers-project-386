@@ -1,0 +1,497 @@
+.slots-page {
+  --slots-soft: color-mix(in srgb, var(--primary) 6%, var(--card));
+  --slots-busy: color-mix(in srgb, var(--foreground) 17%, var(--card));
+  --slots-busy-border: color-mix(in srgb, var(--foreground) 24%, var(--card));
+  --slots-shadow: color-mix(in srgb, var(--foreground) 5%, transparent);
+  --slots-gradient: linear-gradient(135deg, var(--primary), #705de0);
+  padding-block: clamp(2rem, 5vw, 4.5rem);
+}
+
+.slots-page .booking-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.35fr) minmax(0, 0.9fr);
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.slots-page .booking-layout > section {
+  min-width: 0;
+}
+
+.slots-page .meeting-summary,
+.slots-page .calendar-panel,
+.slots-page .times-panel,
+.slots-page .slot-state {
+  border: 1px solid var(--border);
+  border-radius: 1.5rem;
+  background: var(--card);
+  box-shadow: 0 12px 36px var(--slots-shadow);
+}
+
+.slots-page .meeting-summary {
+  padding: 1.75rem;
+  background: linear-gradient(155deg, var(--slots-soft), var(--card) 70%);
+}
+
+.slots-page .meeting-summary-icon {
+  display: grid;
+  place-items: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  margin-bottom: 1.75rem;
+  color: var(--primary);
+  background: var(--card);
+  border: 1px solid color-mix(in srgb, var(--primary) 14%, var(--border));
+  border-radius: 1rem;
+}
+
+.slots-page .meeting-summary-icon svg {
+  width: 1.5rem;
+  height: 1.5rem;
+  stroke-width: 1.7;
+}
+
+.slots-page .slots-eyebrow {
+  margin: 0 0 0.55rem;
+  color: var(--muted-foreground);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.slots-page .meeting-summary h1 {
+  margin: 0 0 0.85rem;
+  color: var(--foreground);
+  font-size: clamp(1.55rem, 2.4vw, 2rem);
+  font-weight: 750;
+  line-height: 1.2;
+  letter-spacing: -0.06em;
+}
+
+.slots-page .meeting-owner {
+  margin-bottom: 1.5rem;
+  color: var(--muted-foreground);
+  font-size: 0.9375rem;
+  font-weight: 500;
+}
+
+.slots-page .meeting-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+.slots-page .meeting-meta svg {
+  width: 1.1rem;
+  height: 1.1rem;
+  flex: none;
+  stroke-width: 1.7;
+}
+
+.slots-page .event-description {
+  margin-block: 1.5rem;
+  color: var(--muted-foreground);
+  font-size: 0.9375rem;
+  line-height: 1.75;
+  white-space: pre-wrap;
+}
+
+.slots-page .meeting-timezone {
+  align-items: start;
+  padding-top: 1.15rem;
+  border-top: 1px solid var(--border);
+}
+
+.slots-page .meeting-timezone svg {
+  margin-top: 0.2rem;
+}
+
+.slots-page .meeting-timezone span span {
+  display: block;
+  color: var(--foreground);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.slots-page .meeting-date {
+  margin-top: 1rem;
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
+}
+
+.slots-page .meeting-selected {
+  width: fit-content;
+  margin-top: 0.75rem;
+  padding: 0.4rem 0.75rem;
+  color: var(--primary);
+  background: var(--slots-soft);
+  border: 1px solid color-mix(in srgb, var(--primary) 18%, var(--border));
+  border-radius: 0.6rem;
+  font-size: 0.875rem;
+  font-weight: 650;
+}
+
+.slots-page .slots-return {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-top: 2rem;
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.slots-page .slots-return svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.slots-page .slots-return:hover {
+  color: var(--primary);
+}
+
+.slots-page .calendar-panel,
+.slots-page .times-panel {
+  padding: 1.5rem;
+  background: linear-gradient(180deg, var(--slots-soft), var(--card) 9rem);
+}
+
+.slots-page .slot-panel-heading {
+  margin-bottom: 1.6rem;
+}
+
+.slots-page .slot-panel-heading h2 {
+  margin: 0;
+  color: var(--foreground);
+  font-size: 1.15rem;
+  font-weight: 700;
+  line-height: 1.4;
+  letter-spacing: -0.035em;
+}
+
+.slots-page .window-caption {
+  margin-top: 0.45rem;
+  color: var(--muted-foreground);
+  font-size: 0.775rem;
+  line-height: 1.5;
+}
+
+.slots-page .month-navigation {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-block: 1.5rem 1.1rem;
+}
+
+.slots-page .month-navigation h3 {
+  color: var(--foreground);
+  font-size: 0.9375rem;
+  font-weight: 650;
+  text-align: center;
+  text-transform: capitalize;
+}
+
+.slots-page .month-navigation .month-navigation-button {
+  width: 2.25rem;
+  height: 2.25rem;
+  flex: none;
+  padding: 0;
+  color: var(--muted-foreground);
+  border: 1px solid var(--border);
+  border-radius: 0.65rem;
+  background: var(--card);
+}
+
+.slots-page .month-navigation-button svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.slots-page .month-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.45rem;
+}
+
+.slots-page .weekday {
+  padding-block: 0.1rem 0.65rem;
+  color: var(--muted-foreground);
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.slots-page .month-grid .calendar-day {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: auto;
+  min-height: 2.65rem;
+  aspect-ratio: 1;
+  padding: 0;
+  color: var(--foreground);
+  border: 1px solid var(--border);
+  border-radius: 0.7rem;
+  background: var(--card);
+  box-shadow: none;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition:
+    border-color 150ms ease,
+    background-color 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.slots-page .month-grid .calendar-day[data-availability='busy'] {
+  border-color: var(--slots-busy-border);
+  background: var(--slots-busy);
+}
+
+.slots-page .month-grid .calendar-day[data-availability='outside'] {
+  color: color-mix(in srgb, var(--muted-foreground) 60%, var(--card));
+  border-color: transparent;
+  background: var(--muted);
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.slots-page .month-grid .calendar-day:not(:disabled):hover {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 12%, transparent);
+}
+
+.slots-page .month-grid .calendar-day[aria-pressed='true'] {
+  color: var(--primary-foreground);
+  border-color: var(--primary);
+  background: var(--slots-gradient);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 16%, transparent);
+}
+
+.slots-page .calendar-day:disabled:not([data-availability='outside']) {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+.slots-page .availability-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.3rem;
+  margin-top: 1.5rem;
+  padding-top: 1.2rem;
+  border-top: 1px solid var(--border);
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+}
+
+.slots-page .availability-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.slots-page .availability-legend i {
+  display: inline-block;
+  width: 0.8rem;
+  height: 0.8rem;
+  border-radius: 0.25rem;
+  border: 1px solid var(--border);
+}
+
+.slots-page .legend-free {
+  background: var(--card);
+}
+
+.slots-page .availability-legend .legend-busy {
+  border-color: var(--slots-busy-border);
+  background: var(--slots-busy);
+}
+
+.slots-page .calendar-panel > [role='status'],
+.slots-page .times-panel > [role='status'] {
+  margin-top: 1rem;
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+.slots-page .slot-list {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.65rem;
+  max-height: 28rem;
+  margin-top: 1rem;
+  padding: 0.2rem;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.slots-page .slot-list .time-slot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  width: 100%;
+  min-height: 3.15rem;
+  padding: 0.75rem;
+  color: var(--foreground);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  background: var(--card);
+  box-shadow: none;
+  font-size: 0.9375rem;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
+
+.slots-page .slot-list .time-slot:not(:disabled):hover {
+  border-color: var(--primary);
+  background: var(--slots-soft);
+}
+
+.slots-page .slot-list .time-slot[data-availability='busy'] {
+  color: color-mix(in srgb, var(--foreground) 80%, var(--card));
+  border-color: var(--slots-busy-border);
+  background: var(--slots-busy);
+  opacity: 1;
+  cursor: not-allowed;
+}
+
+.slots-page .time-slot svg {
+  width: 0.875rem;
+  height: 0.875rem;
+  flex: none;
+}
+
+.slots-page .slot-list .time-slot[aria-pressed='true'] {
+  color: var(--primary-foreground);
+  border-color: var(--primary);
+  background: var(--slots-gradient);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 14%, transparent);
+}
+
+.slots-page .booking-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin-top: 1.5rem;
+  padding-top: 1.2rem;
+  border-top: 1px solid var(--border);
+}
+
+.slots-page .booking-actions a {
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.slots-page .booking-actions a:hover {
+  color: var(--primary);
+}
+
+.slots-page .booking-actions .slots-continue {
+  min-height: 2.85rem;
+  padding: 0.65rem 1rem;
+  color: var(--primary-foreground);
+  border: 1px solid var(--primary);
+  border-radius: 0.75rem;
+  background: var(--slots-gradient);
+  font-size: 0.875rem;
+  font-weight: 650;
+}
+
+.slots-page .times-panel > [role='alert'] {
+  margin-top: 1rem;
+  padding: 0.85rem;
+  color: var(--destructive);
+  border: 1px solid color-mix(in srgb, var(--destructive) 20%, var(--border));
+  border-radius: 0.75rem;
+  background: color-mix(in srgb, var(--destructive) 5%, var(--card));
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+.slots-page .slot-state {
+  grid-column: span 2;
+  padding: 2rem;
+  color: var(--muted-foreground);
+  line-height: 1.6;
+}
+
+.slots-page .slot-state button {
+  margin-top: 1rem;
+}
+
+@media (max-width: 1050px) {
+  .slots-page .booking-layout {
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+  }
+
+  .slots-page .meeting-summary {
+    grid-column: 1 / -1;
+  }
+
+  .slots-page .meeting-summary-icon {
+    margin-bottom: 1.2rem;
+  }
+}
+
+@media (max-width: 700px) {
+  .slots-page .booking-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1rem;
+  }
+
+  .slots-page .meeting-summary,
+  .slots-page .calendar-panel,
+  .slots-page .times-panel {
+    padding: 1.3rem;
+    border-radius: 1.25rem;
+  }
+
+  .slots-page .meeting-summary,
+  .slots-page .slot-state {
+    grid-column: auto;
+  }
+
+  .slots-page .month-grid .calendar-day {
+    min-height: 2.5rem;
+  }
+
+  .slots-page .calendar-panel {
+    padding-inline: 1rem;
+  }
+
+  .slots-page .month-grid {
+    gap: 0.3rem;
+  }
+
+  .slots-page .slot-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 360px) {
+  .slots-page .calendar-panel,
+  .slots-page .times-panel {
+    padding: 1rem;
+  }
+
+  .slots-page .slot-list {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .slots-page .month-grid .calendar-day {
+    transition: none;
+  }
+}
