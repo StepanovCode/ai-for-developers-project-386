@@ -44,7 +44,7 @@ func TestPostgresSlotsReadAllTypesAndWindowEdges(t *testing.T) {
 		t.Fatal(err)
 	}
 	// All fixtures are inserted only after the explicit isolated-host/database guard.
-	for _, fixture := range []struct{ id, start string }{{"00000000-0000-4000-8000-000000000003", "2026-10-07T10:00:00+03:00"}, {"00000000-0000-4000-8000-000000000004", "2026-10-06T23:30:00+03:00"}, {"00000000-0000-4000-8000-000000000005", "2026-10-06T23:00:00+03:00"}, {"00000000-0000-4000-8000-000000000006", "2026-10-21T00:00:00+03:00"}} {
+	for _, fixture := range []struct{ id, start string }{{"00000000-0000-4000-8000-000000000003", "2026-10-07T10:00:00+03:00"}, {"00000000-0000-4000-8000-000000000004", "2026-10-06T23:30:00+03:00"}, {"00000000-0000-4000-8000-000000000005", "2026-10-06T22:00:00+03:00"}, {"00000000-0000-4000-8000-000000000006", "2026-10-21T00:00:00+03:00"}} {
 		start, parseErr := time.Parse(time.RFC3339, fixture.start)
 		if parseErr != nil {
 			t.Fatal(parseErr)

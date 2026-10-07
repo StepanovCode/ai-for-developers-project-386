@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useEffect, useState } from 'react'
 import { AdminNav, CreateEventPage, EventsPage } from './events'
 import { SlotsPage } from './slots'
+import { BookingForm, ConfirmationPage, type GuestDraft } from './bookings'
 import { ServiceStatus } from '@/components/service-status'
 
 function SiteHeader() {
@@ -79,6 +80,7 @@ function HomePage() {
 function App() {
   const [path, setPath] = useState(window.location.pathname.replace(/\/$/, '') || '/')
   const [notice, setNotice] = useState('')
+  const [draft, setDraft] = useState<GuestDraft>({ name: '', email: '' })
   useEffect(() => {
     const onPop = () => setPath(window.location.pathname.replace(/\/$/, '') || '/')
     window.addEventListener('popstate', onPop)
@@ -94,14 +96,16 @@ function App() {
   else if (type) page = <SlotsPage key={type[1]} id={type[1]} />
   else if (/^\/book\/[^/]+\/details$/.test(path))
     page = (
-      <main className="page-surface">
-        <section className="site-container catalog-page">
-          <h1 tabIndex={-1}>Данные гостя</h1>
-          <p>Форма бронирования появится в следующем этапе.</p>
-          <a href={path.replace('/details', '') + window.location.search}>Назад к выбору времени</a>
-        </section>
-      </main>
+      <BookingForm
+        key={path}
+        id={path.split('/')[2]}
+        draft={draft}
+        onDraft={setDraft}
+        onSuccess={() => setDraft({ name: '', email: '' })}
+      />
     )
+  else if (/^\/bookings\/[^/]+$/.test(path))
+    page = <ConfirmationPage key={path} id={path.split('/')[2]} />
   else if (path === '/admin' || path === '/admin/event-types')
     page = <EventsPage admin notice={notice} />
   else if (path === '/admin/event-types/new')

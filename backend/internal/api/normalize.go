@@ -67,6 +67,17 @@ func normalizeBody(c *gin.Context) {
 			return
 		}
 	}
+	if c.FullPath() == "/api/bookings" {
+		name, _ := body["guestName"].(string)
+		email, _ := body["guestEmail"].(string)
+		_, _, err := domain.ValidateGuest(name, email)
+		if validation, ok := err.(*domain.ValidationError); ok {
+			public := validationError()
+			public.FieldErrors = validation.Fields
+			writeError(c, public)
+			return
+		}
+	}
 	encoded, err := json.Marshal(body)
 	if err != nil {
 		writeError(c, err)

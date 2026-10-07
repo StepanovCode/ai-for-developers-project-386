@@ -1,0 +1,204 @@
+import { useEffect, useRef, useState, type FormEvent } from 'react'
+import { createBooking, getBooking, getEventType } from './api/generated/sdk.gen'
+import type { BookingConfirmation, EventTypeDetails } from './api/generated/types.gen'
+export type GuestDraft = { name: string; email: string }
+function navigate(url: string) {
+  window.history.pushState({}, '', url)
+  window.dispatchEvent(new PopStateEvent('popstate'))
+}
+function displayTime(value: string) {
+  return new Intl.DateTimeFormat('ru-RU', {
+    timeZone: 'Europe/Moscow',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(new Date(value))
+}
+function displayDate(value: string) {
+  const date = new Intl.DateTimeFormat('ru-RU', {
+    timeZone: 'Europe/Moscow',
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  }).format(new Date(value))
+  return date.replaceAll('.', '-')
+}
+export function BookingForm({
+  id,
+  draft,
+  onDraft,
+  onSuccess,
+}: {
+  id: string
+  draft: GuestDraft
+  onDraft: (draft: GuestDraft) => void
+  onSuccess: () => void
+}) {
+  const [data, setData] = useState<EventTypeDetails>()
+  const [message, setMessage] = useState('')
+  const [fields, setFields] = useState<Record<string, string[]>>({})
+  const [pending, setPending] = useState(false)
+  const form = useRef<HTMLFormElement>(null)
+  const active = useRef(true)
+  const slot = new URLSearchParams(window.location.search).get('slot') ?? ''
+  const validSlot = Number.isFinite(Date.parse(slot))
+  const date = new URLSearchParams(window.location.search).get('date') ?? ''
+  useEffect(() => {
+    active.current = true
+    let loadActive = true
+    const controller = new AbortController()
+    void getEventType({ baseUrl: window.location.origin, path: { id }, signal: controller.signal })
+      .then((r) => {
+        if (!loadActive || controller.signal.aborted) return
+        if (r.data) {
+          setData(r.data)
+          setMessage('')
+        } else
+          setMessage(
+            r.response?.status === 404
+              ? 'Тип события не найден'
+              : 'Не удалось загрузить тип события',
+          )
+      })
+      .catch(() => {
+        if (loadActive && !controller.signal.aborted) setMessage('Не удалось загрузить тип события')
+      })
+    return () => {
+      loadActive = false
+      active.current = false
+      controller.abort()
+    }
+  }, [id])
+  async function submit(e: FormEvent) {
+    e.preventDefault()
+    if (pending || !data || !validSlot) return
+    setPending(true)
+    setFields({})
+    setMessage('')
+    try {
+      const r = await createBooking({
+        baseUrl: window.location.origin,
+        body: { eventTypeId: id, startsAt: slot, guestName: draft.name, guestEmail: draft.email },
+      })
+      if (!active.current) return
+      if (r.data) {
+        onSuccess()
+        navigate(`/bookings/${r.data.id}`)
+      } else {
+        if (r.error && 'fieldErrors' in r.error) {
+          setFields(r.error.fieldErrors ?? {})
+          const first = ['guestName', 'guestEmail'].find(
+            (key) => r.error && 'fieldErrors' in r.error && r.error.fieldErrors?.[key],
+          )
+          requestAnimationFrame(() =>
+            form.current?.querySelector<HTMLElement>(`[name="${first}"]`)?.focus(),
+          )
+        }
+        setMessage(r.error?.message ?? 'Не удалось узнать результат. Повторите попытку')
+      }
+    } catch {
+      if (active.current) setMessage('Не удалось узнать результат. Повторите попытку')
+    } finally {
+      if (active.current) setPending(false)
+    }
+  }
+  return (
+    <main className="page-surface">
+      <section className="site-container catalog-page">
+        <h1 tabIndex={-1}>Данные гостя</h1>
+        {data && validSlot && (
+          <p>
+            {data.eventType.name} · {displayDate(slot)} · {displayTime(slot)}–
+            {displayTime(
+              new Date(Date.parse(slot) + data.eventType.durationMinutes * 60000).toISOString(),
+            )}{' '}
+            · Europe/Moscow · {data.owner.name}
+          </p>
+        )}
+        {!validSlot && <p role="alert">Выберите время встречи</p>}
+        {message && <p role="alert">{message}</p>}
+        <form className="event-form" ref={form} onSubmit={submit} noValidate>
+          <label htmlFor="guestName">Имя</label>
+          <input
+            id="guestName"
+            name="guestName"
+            autoComplete="name"
+            value={draft.name}
+            aria-invalid={!!fields.guestName}
+            aria-describedby={fields.guestName ? 'guestName-error' : undefined}
+            onChange={(e) => onDraft({ ...draft, name: e.target.value })}
+          />
+          {fields.guestName && <p id="guestName-error">{fields.guestName.join(' ')}</p>}
+          <label htmlFor="guestEmail">Email</label>
+          <input
+            id="guestEmail"
+            name="guestEmail"
+            type="email"
+            autoComplete="email"
+            value={draft.email}
+            aria-invalid={!!fields.guestEmail}
+            aria-describedby={fields.guestEmail ? 'guestEmail-error' : undefined}
+            onChange={(e) => onDraft({ ...draft, email: e.target.value })}
+          />
+          {fields.guestEmail && <p id="guestEmail-error">{fields.guestEmail.join(' ')}</p>}
+          <button
+            type="button"
+            onClick={() => navigate(`/book/${id}?${new URLSearchParams({ date, slot })}`)}
+          >
+            Назад
+          </button>
+          <button className="primary-link" disabled={pending || !data || !validSlot} type="submit">
+            {pending ? 'Сохраняем…' : 'Забронировать'}
+          </button>
+        </form>
+      </section>
+    </main>
+  )
+}
+export function ConfirmationPage({ id }: { id: string }) {
+  const [data, setData] = useState<BookingConfirmation>()
+  const [message, setMessage] = useState('Загружаем подтверждение…')
+  useEffect(() => {
+    const c = new AbortController()
+    let active = true
+    void getBooking({ baseUrl: window.location.origin, path: { id }, signal: c.signal })
+      .then((r) => {
+        if (!active) return
+        if (r.data) setData(r.data)
+        else
+          setMessage(
+            r.response?.status === 404
+              ? 'Бронирование не найдено'
+              : 'Не удалось загрузить подтверждение',
+          )
+      })
+      .catch(() => {
+        if (active) setMessage('Не удалось загрузить подтверждение')
+      })
+    return () => {
+      active = false
+      c.abort()
+    }
+  }, [id])
+  useEffect(() => {
+    document.querySelector<HTMLElement>('main h1')?.focus()
+  }, [data, message])
+  return (
+    <main className="page-surface">
+      <section className="site-container catalog-page">
+        <h1 tabIndex={-1}>{data ? 'Бронирование подтверждено' : message}</h1>
+        {data && (
+          <>
+            <p>Номер бронирования: {data.id}</p>
+            <h2>{data.eventTypeName}</h2>
+            <p>
+              {displayDate(data.startsAt)} · {displayTime(data.startsAt)}–{displayTime(data.endsAt)}
+            </p>
+            <p>{data.timeZone}</p>
+            <p>{data.owner.name}</p>
+          </>
+        )}
+        <a href="/book">Выбрать другую встречу</a>
+      </section>
+    </main>
+  )
+}

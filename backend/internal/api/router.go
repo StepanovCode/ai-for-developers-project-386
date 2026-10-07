@@ -22,6 +22,10 @@ func NewRouterWithApplication(events *usecase.Events, slots ...*usecase.Slots) h
 	return newRouter(handler)
 }
 
+func NewRouterWithBookings(events *usecase.Events, slots *usecase.Slots, bookings *usecase.Bookings) http.Handler {
+	return newRouter(server{events: events, slots: slots, bookings: bookings})
+}
+
 func newRouter(handler generated.StrictServerInterface) http.Handler {
 	spec, err := generated.GetSpec()
 	if err != nil {

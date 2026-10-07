@@ -46,7 +46,7 @@ func run(logger *slog.Logger) error {
 
 	server := &http.Server{
 		Addr:              net.JoinHostPort("", cfg.Port),
-		Handler:           api.NewRouterWithApplication(application, usecase.NewSlots(database, cfg.Schedule, time.Now)),
+		Handler:           api.NewRouterWithBookings(application, usecase.NewSlots(database, cfg.Schedule, time.Now), usecase.NewBookings(database, cfg.Schedule, time.Now)),
 		ReadHeaderTimeout: 5 * time.Second,
 		ReadTimeout:       10 * time.Second,
 		WriteTimeout:      10 * time.Second,
