@@ -36,7 +36,13 @@ export function SlotsPage({ id }: { id: string }) {
   const [notice, setNotice] = useState('')
   const heading = useRef<HTMLHeadingElement>(null)
   const timesHeading = useRef<HTMLHeadingElement>(null)
-  const continuing = useRef(false)
+  const availabilityCheck = useRef<AbortController | null>(null)
+  useEffect(() => {
+    return () => {
+      availabilityCheck.current?.abort()
+      availabilityCheck.current = null
+    }
+  }, [id])
   useEffect(() => {
     const controller = new AbortController()
     let active = true
@@ -79,6 +85,9 @@ export function SlotsPage({ id }: { id: string }) {
   }, [id, attempt])
   useEffect(() => {
     const restore = () => {
+      availabilityCheck.current?.abort()
+      availabilityCheck.current = null
+      setChecking(false)
       if (!windowData) return
       const chosen = chooseDate(windowData, requestedDate())
       setDate(chosen)
@@ -90,6 +99,9 @@ export function SlotsPage({ id }: { id: string }) {
     return () => window.removeEventListener('popstate', restore)
   }, [windowData])
   function selectDate(next: string) {
+    availabilityCheck.current?.abort()
+    availabilityCheck.current = null
+    setChecking(false)
     setDate(next)
     setMonth(next.slice(0, 7))
     setSelected('')
@@ -101,12 +113,18 @@ export function SlotsPage({ id }: { id: string }) {
     timesHeading.current?.focus()
   }
   async function continueBooking() {
-    if (!selected || continuing.current) return
-    continuing.current = true
+    if (!selected || availabilityCheck.current) return
+    const controller = new AbortController()
+    availabilityCheck.current = controller
     setChecking(true)
     setNotice('')
     try {
-      const result = await getSlots({ baseUrl: window.location.origin, path: { id } })
+      const result = await getSlots({
+        baseUrl: window.location.origin,
+        path: { id },
+        signal: controller.signal,
+      })
+      if (controller.signal.aborted || availabilityCheck.current !== controller) return
       if (!result.data) throw new Error('availability failed')
       const fresh = result.data
       const available = fresh.days
@@ -128,10 +146,13 @@ export function SlotsPage({ id }: { id: string }) {
       window.history.pushState({}, '', bookingDetailsUrl(id, date, selected))
       window.dispatchEvent(new PopStateEvent('popstate'))
     } catch {
-      setNotice('Не удалось проверить доступность. Повторите попытку')
+      if (!controller.signal.aborted && availabilityCheck.current === controller)
+        setNotice('Не удалось проверить доступность. Повторите попытку')
     } finally {
-      continuing.current = false
-      setChecking(false)
+      if (availabilityCheck.current === controller) {
+        availabilityCheck.current = null
+        setChecking(false)
+      }
     }
   }
   const day = windowData?.days.find((day) => day.date === date)

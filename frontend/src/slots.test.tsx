@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react'
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, test, expect, vi } from 'vitest'
 import App from './App'
 const id = 'b89ff958-472f-4cb3-af6b-5bc9a5277b88'
@@ -193,4 +193,49 @@ test('loading is distinct from empty slots', () => {
   render(<App />)
   expect(screen.getByText('Загрузка доступного времени…')).toBeVisible()
   expect(screen.queryByText('Нет доступного времени в ближайшие 14 дней')).not.toBeInTheDocument()
+})
+
+test.each([
+  { label: 'leaving the page', target: '/' },
+  { label: 'restoring another date', target: `/book/${id}?date=2026-10-31` },
+])('pending continue cannot navigate after $label', async ({ target }) => {
+  setup()
+  const original = globalThis.fetch
+  let resolveCheck!: (value: Response) => void
+  let pendingRequest!: Request
+  const pending = new Promise<Response>((resolve) => {
+    resolveCheck = resolve
+  })
+  let reads = 0
+  vi.stubGlobal(
+    'fetch',
+    vi.fn((request: Request) => {
+      if (new URL(request.url).pathname.endsWith('/slots') && ++reads > 1) {
+        pendingRequest = request
+        // Deliberately ignore abort: a late success must also be guarded in the component.
+        return pending
+      }
+      return original(request)
+    }),
+  )
+  render(<App />)
+  fireEvent.click(await screen.findByRole('button', { name: '09:00–09:30 — Свободно' }))
+  fireEvent.click(screen.getByRole('button', { name: 'Продолжить' }))
+  expect(screen.getByRole('button', { name: 'Проверка…' })).toBeDisabled()
+  await waitFor(() => expect(pendingRequest).toBeDefined())
+  window.history.pushState({}, '', target)
+  fireEvent(window, new PopStateEvent('popstate'))
+  await act(async () => {
+    resolveCheck(await original(pendingRequest))
+  })
+  expect(window.location.pathname + window.location.search).toBe(target)
+  expect(screen.queryByRole('heading', { name: 'Данные гостя' })).not.toBeInTheDocument()
+  if (target === '/') expect(screen.getByRole('heading', { name: 'На связи' })).toBeVisible()
+  else {
+    expect(screen.getByRole('heading', { name: 'Время на 31-10-2026' })).toBeVisible()
+    expect(screen.getByRole('button', { name: 'Продолжить' })).toBeDisabled()
+    expect(
+      screen.queryByText('Не удалось проверить доступность. Повторите попытку'),
+    ).not.toBeInTheDocument()
+  }
 })
