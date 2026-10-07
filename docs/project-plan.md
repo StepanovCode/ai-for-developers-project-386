@@ -1633,7 +1633,15 @@ Docker `make tooling-build tooling-install`, `make commits-check` и
 что корректный новый коммит проходит, а новый коммит с тем же неправильным
 заголовком PR #22 отклоняется: исключение по тексту не применяется.
 
-Остаётся: CI опубликованной ветки/PR, squash merge с Conventional Commit,
+Опубликован коммит `8f6cfab` (`fix(ci): validate history after legacy squash merge`)
+в ветке `codex/fix-ci-validation`. На push прошли frontend, backend (включая
+database-test) и commits в
+[CI](https://github.com/StepanovCode/ai-for-developers-project-386/actions/runs/37692352359),
+а также
+[hexlet-check](https://github.com/StepanovCode/ai-for-developers-project-386/actions/runs/37692352188).
+Release-please на push в эту ветку ожидаемо не запускается: он работает на main.
+
+Остаётся: создание PR и его CI, squash merge с Conventional Commit,
 настройка обязательных frontend/backend/commits для main без обхода владельцем,
 исправление прав PAT и реальная проверка release-PR. Этапы 8–9 сохраняют
 статус ожидания внешнего действия; release-PR и main агентом не сливаются.
