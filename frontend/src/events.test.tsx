@@ -139,7 +139,7 @@ test('unknown type has a catalog return link', async () => {
 test('home heading receives focus on direct navigation', () => {
   mock({ owner, items: [] })
   render(<App />)
-  expect(screen.getByRole('heading', { name: 'На связи' })).toHaveFocus()
+  expect(screen.getByRole('heading', { name: 'Meetly' })).toHaveFocus()
 })
 
 test('late create success keeps the catalog chosen while request was pending', async () => {

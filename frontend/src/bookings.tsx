@@ -1,6 +1,11 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
+import { ArrowRight, CalendarDays, Check, CircleAlert, Clock3, UserRound } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
 import { createBooking, getBooking, getEventType } from './api/generated/sdk.gen'
 import type { BookingConfirmation, EventTypeDetails } from './api/generated/types.gen'
+import './pages.css'
 export type GuestDraft = { name: string; email: string }
 function navigate(url: string, state = {}) {
   window.history.pushState(state, '', url)
@@ -129,73 +134,99 @@ export function BookingForm({
   return (
     <main className="page-surface">
       <section className="site-container catalog-page">
-        <h1 tabIndex={-1}>Данные гостя</h1>
-        {data && validSlot && (
-          <p>
-            {data.eventType.name} · {displayDate(slot)} · {displayTime(slot)}–
-            {displayTime(
-              new Date(Date.parse(slot) + data.eventType.durationMinutes * 60000).toISOString(),
-            )}{' '}
-            · Europe/Moscow · {data.owner.name}
-          </p>
-        )}
-        {loading && <p role="status">Загрузка типа события…</p>}
-        {loadError && (
-          <div role="alert">
-            <p>{loadError}</p>
-            {loadError !== 'Тип события не найден' && (
-              <button
-                onClick={() => {
-                  setLoading(true)
-                  setLoadError('')
-                  setAttempt(attempt + 1)
-                }}
-              >
-                Повторить
-              </button>
-            )}
+        <Card className="form-card guest-form-card">
+          <div className="form-card-heading">
+            <span className="page-icon">
+              <UserRound size={24} aria-hidden="true" />
+            </span>
+            <h1 tabIndex={-1}>Данные гостя</h1>
           </div>
-        )}
-        {!validSlot && <p role="alert">Выберите время встречи</p>}
-        {message && <p role="alert">{message}</p>}
-        <form className="event-form" ref={form} onSubmit={submit} noValidate>
-          <label htmlFor="guestName">Имя</label>
-          <input
-            id="guestName"
-            name="guestName"
-            autoComplete="name"
-            value={draft.name}
-            aria-invalid={!!fields.guestName}
-            aria-describedby={fields.guestName ? 'guestName-error' : undefined}
-            onChange={(e) => onDraft({ ...draft, name: e.target.value })}
-          />
-          {fields.guestName && <p id="guestName-error">{fields.guestName.join(' ')}</p>}
-          <label htmlFor="guestEmail">Email</label>
-          <input
-            id="guestEmail"
-            name="guestEmail"
-            type="email"
-            autoComplete="email"
-            value={draft.email}
-            aria-invalid={!!fields.guestEmail}
-            aria-describedby={fields.guestEmail ? 'guestEmail-error' : undefined}
-            onChange={(e) => onDraft({ ...draft, email: e.target.value })}
-          />
-          {fields.guestEmail && <p id="guestEmail-error">{fields.guestEmail.join(' ')}</p>}
-          <button
-            type="button"
-            onClick={() => navigate(`/book/${id}?${new URLSearchParams({ date, slot })}`)}
-          >
-            Назад
-          </button>
-          <button
-            className="primary-link"
-            disabled={pending || loading || !!loadError || !data || !validSlot}
-            type="submit"
-          >
-            {pending ? 'Сохраняем…' : 'Забронировать'}
-          </button>
-        </form>
+          <CardContent>
+            {data && validSlot && (
+              <p className="booking-summary">
+                {data.eventType.name} · {displayDate(slot)} · {displayTime(slot)}–
+                {displayTime(
+                  new Date(Date.parse(slot) + data.eventType.durationMinutes * 60000).toISOString(),
+                )}{' '}
+                · Europe/Moscow · {data.owner.name}
+              </p>
+            )}
+            {loading && (
+              <p className="page-state" role="status">
+                Загрузка типа события…
+              </p>
+            )}
+            {loadError && (
+              <div className="page-state page-error" role="alert">
+                <p>{loadError}</p>
+                {loadError !== 'Тип события не найден' && (
+                  <Button
+                    variant="outline"
+                    type="button"
+                    onClick={() => {
+                      setLoading(true)
+                      setLoadError('')
+                      setAttempt(attempt + 1)
+                    }}
+                  >
+                    Повторить
+                  </Button>
+                )}
+              </div>
+            )}
+            {!validSlot && (
+              <p className="page-notice page-error" role="alert">
+                Выберите время встречи
+              </p>
+            )}
+            {message && (
+              <p className="page-notice page-error" role="alert">
+                {message}
+              </p>
+            )}
+            <form className="event-form" ref={form} onSubmit={submit} noValidate>
+              <label htmlFor="guestName">Имя</label>
+              <Input
+                id="guestName"
+                name="guestName"
+                autoComplete="name"
+                value={draft.name}
+                aria-invalid={!!fields.guestName}
+                aria-describedby={fields.guestName ? 'guestName-error' : undefined}
+                onChange={(e) => onDraft({ ...draft, name: e.target.value })}
+              />
+              {fields.guestName && <p id="guestName-error">{fields.guestName.join(' ')}</p>}
+              <label htmlFor="guestEmail">Email</label>
+              <Input
+                id="guestEmail"
+                name="guestEmail"
+                type="email"
+                autoComplete="email"
+                value={draft.email}
+                aria-invalid={!!fields.guestEmail}
+                aria-describedby={fields.guestEmail ? 'guestEmail-error' : undefined}
+                onChange={(e) => onDraft({ ...draft, email: e.target.value })}
+              />
+              {fields.guestEmail && <p id="guestEmail-error">{fields.guestEmail.join(' ')}</p>}
+              <div className="form-actions">
+                <Button
+                  variant="outline"
+                  type="button"
+                  onClick={() => navigate(`/book/${id}?${new URLSearchParams({ date, slot })}`)}
+                >
+                  Назад
+                </Button>
+                <Button
+                  className="form-submit"
+                  disabled={pending || loading || !!loadError || !data || !validSlot}
+                  type="submit"
+                >
+                  {pending ? 'Сохраняем…' : 'Забронировать'}
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
       </section>
     </main>
   )
@@ -232,30 +263,54 @@ export function ConfirmationPage({ id }: { id: string }) {
   return (
     <main className="page-surface">
       <section className="site-container catalog-page">
-        <h1 tabIndex={-1}>{data ? 'Бронирование подтверждено' : message}</h1>
-        {!data && message === 'Не удалось загрузить подтверждение' && (
-          <button
-            type="button"
-            onClick={() => {
-              setMessage('Загружаем подтверждение…')
-              setAttempt((value) => value + 1)
-            }}
-          >
-            Повторить
-          </button>
-        )}
-        {data && (
-          <>
-            <p>Номер бронирования: {data.id}</p>
-            <h2>{data.eventTypeName}</h2>
-            <p>
-              {displayDate(data.startsAt)} · {displayTime(data.startsAt)}–{displayTime(data.endsAt)}
-            </p>
-            <p>{data.timeZone}</p>
-            <p>{data.owner.name}</p>
-          </>
-        )}
-        <a href="/book">Выбрать другую встречу</a>
+        <Card className="confirmation-card">
+          <CardContent>
+            <div className={`confirmation-icon ${data ? 'is-success' : ''}`} aria-hidden="true">
+              {data ? (
+                <Check size={32} />
+              ) : message === 'Загружаем подтверждение…' ? (
+                <CalendarDays size={32} />
+              ) : (
+                <CircleAlert size={32} />
+              )}
+            </div>
+            <h1 tabIndex={-1}>{data ? 'Бронирование подтверждено' : message}</h1>
+            {!data && message === 'Не удалось загрузить подтверждение' && (
+              <Button
+                variant="outline"
+                type="button"
+                onClick={() => {
+                  setMessage('Загружаем подтверждение…')
+                  setAttempt((value) => value + 1)
+                }}
+              >
+                Повторить
+              </Button>
+            )}
+            {data && (
+              <div className="confirmation-details">
+                <h2>{data.eventTypeName}</h2>
+                <p className="confirmation-date">
+                  <CalendarDays size={18} aria-hidden="true" />
+                  {displayDate(data.startsAt)} · {displayTime(data.startsAt)}–
+                  {displayTime(data.endsAt)}
+                </p>
+                <p>
+                  <Clock3 size={18} aria-hidden="true" />
+                  {data.timeZone}
+                </p>
+                <p>
+                  <UserRound size={18} aria-hidden="true" />
+                  {data.owner.name}
+                </p>
+                <p className="confirmation-number">Номер бронирования: {data.id}</p>
+              </div>
+            )}
+            <a className="page-text-link" href="/book">
+              Выбрать другую встречу <ArrowRight size={16} aria-hidden="true" />
+            </a>
+          </CardContent>
+        </Card>
       </section>
     </main>
   )

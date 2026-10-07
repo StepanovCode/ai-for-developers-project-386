@@ -1,5 +1,8 @@
+import './slots.css'
 import { bookingDetailsUrl } from './booking-navigation'
 import { useEffect, useRef, useState } from 'react'
+import { CalendarDays, ChevronLeft, ChevronRight, Clock3, Globe2, LockKeyhole } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import { getEventType, getSlots } from './api/generated/sdk.gen'
 import type { EventTypeDetails, SlotWindow } from './api/generated/types.gen'
 
@@ -170,56 +173,88 @@ export function SlotsPage({ id }: { id: string }) {
     : 0
   return (
     <main className="page-surface">
-      <section className="site-container catalog-page">
+      <section className="site-container catalog-page slots-page">
         <div className="booking-layout">
           <section className="meeting-summary" aria-label="Сведения о встрече">
+            <div className="meeting-summary-icon" aria-hidden="true">
+              <CalendarDays />
+            </div>
+            <p className="slots-eyebrow">Ваша встреча</p>
             <h1 tabIndex={-1} ref={heading}>
               {details?.eventType.name ?? 'Выберите время'}
             </h1>
             {details && (
               <>
-                <p>{details.owner.name}</p>
-                <p>{details.eventType.durationMinutes} минут</p>
+                <p className="meeting-owner">{details.owner.name}</p>
+                <p className="meeting-meta">
+                  <Clock3 aria-hidden="true" />
+                  {details.eventType.durationMinutes} минут
+                </p>
                 <p className="event-description">{details.eventType.description}</p>
               </>
             )}
-            <p>
-              Часовой пояс: <span>Europe/Moscow</span>
+            <p className="meeting-meta meeting-timezone">
+              <Globe2 aria-hidden="true" />
+              <span>
+                Часовой пояс: <span>Europe/Moscow</span>
+              </span>
             </p>
-            {date && windowData && <p>Дата: {displayDate(date)}</p>}
-            {selected && <p role="status">Выбрано: {displayTime(selected)}</p>}
-            <a href="/book">К каталогу</a>
+            {date && windowData && <p className="meeting-date">Дата: {displayDate(date)}</p>}
+            {selected && (
+              <p className="meeting-selected" role="status">
+                Выбрано: {displayTime(selected)}
+              </p>
+            )}
+            <a className="slots-return" href="/book">
+              <ChevronLeft aria-hidden="true" />К каталогу
+            </a>
           </section>
-          {status === 'loading' && <p role="status">Загрузка доступного времени…</p>}
-          {status === 'missing' && <p role="alert">Тип события не найден</p>}
+          {status === 'loading' && (
+            <p className="slot-state" role="status">
+              Загрузка доступного времени…
+            </p>
+          )}
+          {status === 'missing' && (
+            <p className="slot-state" role="alert">
+              Тип события не найден
+            </p>
+          )}
           {status === 'error' && (
-            <div role="alert">
+            <div className="slot-state" role="alert">
               <p>Не удалось загрузить доступное время</p>
-              <button
+              <Button
+                type="button"
+                variant="outline"
                 onClick={() => {
                   setStatus('loading')
                   setAttempt(attempt + 1)
                 }}
               >
                 Повторить
-              </button>
+              </Button>
             </div>
           )}
           {status === 'ready' && windowData && (
             <>
               <section className="calendar-panel" aria-label="Календарь">
-                <h2>Выберите дату</h2>
-                <p className="window-caption">
-                  {displayDate(windowData.windowStart)} — {displayDate(windowData.windowEnd)}
-                </p>
+                <div className="slot-panel-heading">
+                  <p className="slots-eyebrow">Шаг 1</p>
+                  <h2>Выберите дату</h2>
+                  <p className="window-caption">
+                    {displayDate(windowData.windowStart)} — {displayDate(windowData.windowEnd)}
+                  </p>
+                </div>
                 <div className="month-navigation">
-                  <button
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className="month-navigation-button"
                     aria-label="Предыдущий месяц"
                     disabled={monthIndex <= 0 || checking}
                     onClick={() => setMonth(months[monthIndex - 1])}
                   >
-                    ←
-                  </button>
+                    <ChevronLeft aria-hidden="true" />
+                  </Button>
                   <h3 aria-live="polite">
                     {monthDate?.toLocaleDateString('ru-RU', {
                       timeZone: 'UTC',
@@ -227,13 +262,16 @@ export function SlotsPage({ id }: { id: string }) {
                       year: 'numeric',
                     })}
                   </h3>
-                  <button
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className="month-navigation-button"
                     aria-label="Следующий месяц"
                     disabled={monthIndex === months.length - 1 || checking}
                     onClick={() => setMonth(months[monthIndex + 1])}
                   >
-                    →
-                  </button>
+                    <ChevronRight aria-hidden="true" />
+                  </Button>
                 </div>
                 <div className="month-grid" role="group" aria-label="Даты месяца">
                   {['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'].map((label) => (
@@ -250,9 +288,14 @@ export function SlotsPage({ id }: { id: string }) {
                     const free =
                       calendarDay?.slots.filter((slot) => slot.status === 'available').length ?? 0
                     return (
-                      <button
+                      <Button
+                        type="button"
+                        variant="outline"
                         key={value}
                         className="calendar-day"
+                        data-availability={
+                          !calendarDay ? 'outside' : free > 0 ? 'available' : 'busy'
+                        }
                         disabled={!calendarDay || checking}
                         aria-pressed={value === date}
                         aria-label={
@@ -263,42 +306,69 @@ export function SlotsPage({ id }: { id: string }) {
                         onClick={() => selectDate(value)}
                       >
                         <span>{i + 1}</span>
-                        {calendarDay && <small>{free} своб.</small>}
-                      </button>
+                      </Button>
                     )
                   })}
+                </div>
+                <div className="availability-legend" aria-label="Обозначения доступности">
+                  <span>
+                    <i className="legend-free" aria-hidden="true" />
+                    Есть свободное время
+                  </span>
+                  <span>
+                    <i className="legend-busy" aria-hidden="true" />
+                    Нет свободного времени
+                  </span>
                 </div>
                 {!anyFree && <p role="status">Нет доступного времени в ближайшие 14 дней</p>}
               </section>
               <section className="times-panel" aria-label="Выбор времени">
-                <h2 ref={timesHeading} tabIndex={-1}>
-                  Время на {displayDate(date)}
-                </h2>
+                <div className="slot-panel-heading">
+                  <p className="slots-eyebrow">Шаг 2</p>
+                  <h2 ref={timesHeading} tabIndex={-1}>
+                    Время на {displayDate(date)}
+                  </h2>
+                  <p className="window-caption">По московскому времени</p>
+                </div>
                 {day && !day.slots.some((slot) => slot.status === 'available') && (
                   <p role="status">На эту дату нет свободного времени</p>
                 )}
                 <div className="slot-list">
                   {day?.slots.map((slot) => (
-                    <button
+                    <Button
+                      type="button"
+                      variant="outline"
                       key={slot.startsAt}
+                      className="time-slot"
+                      data-availability={slot.status}
                       disabled={slot.status === 'busy' || checking}
                       aria-pressed={slot.startsAt === selected}
+                      aria-label={`${displayTime(slot.startsAt)}–${displayTime(slot.endsAt)} — ${
+                        slot.status === 'busy' ? 'Занято' : 'Свободно'
+                      }`}
                       onClick={() => {
                         setSelected(slot.startsAt)
                         setNotice('')
                       }}
                     >
-                      {displayTime(slot.startsAt)}–{displayTime(slot.endsAt)} —{' '}
-                      {slot.status === 'busy' ? 'Занято' : 'Свободно'}
-                    </button>
+                      <span>
+                        {displayTime(slot.startsAt)}–{displayTime(slot.endsAt)}
+                      </span>
+                      {slot.status === 'busy' && <LockKeyhole aria-hidden="true" />}
+                    </Button>
                   ))}
                 </div>
                 {notice && <p role="alert">{notice}</p>}
                 <div className="booking-actions">
                   <a href="/book">Назад</a>
-                  <button disabled={!selected || checking} onClick={() => void continueBooking()}>
+                  <Button
+                    type="button"
+                    className="slots-continue"
+                    disabled={!selected || checking}
+                    onClick={() => void continueBooking()}
+                  >
                     {checking ? 'Проверка…' : 'Продолжить'}
-                  </button>
+                  </Button>
                 </div>
               </section>
             </>

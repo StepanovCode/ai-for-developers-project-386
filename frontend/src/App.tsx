@@ -1,5 +1,6 @@
-import { ArrowRight, CalendarDays, Clock3, PhoneCall, UserRoundCheck } from 'lucide-react'
+import { ArrowRight, CalendarDays, Clock3, Sparkles, UserRoundCheck } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
 import { useEffect, useState } from 'react'
 import { CreateEventPage, EventsPage } from './events'
 import { MeetingsPage } from './meetings'
@@ -11,18 +12,20 @@ function SiteHeader() {
   return (
     <header className="site-header">
       <div className="site-container header-content">
-        <a className="brand" href="/" aria-label="На связи — на главную">
-          <span className="brand-mark" aria-hidden="true">
-            <PhoneCall size={20} strokeWidth={2.2} />
-          </span>
-          <span>На связи</span>
+        <a className="brand" href="/" aria-label="Meetly — на главную">
+          <img className="brand-mark" src="/logo.svg" alt="" />
+          <span>Meetly</span>
         </a>
-        <a className="header-link" href="/book">
-          Записаться <ArrowRight size={17} aria-hidden="true" />
-        </a>
-        <a className="header-link" href="/admin">
-          Админка
-        </a>
+        <nav className="header-nav" aria-label="Основная навигация">
+          <a className="header-link" href="/admin">
+            Админка
+          </a>
+          <Button asChild variant="outline" className="header-booking">
+            <a href="/book">
+              Записаться <ArrowRight size={17} aria-hidden="true" />
+            </a>
+          </Button>
+        </nav>
       </div>
     </header>
   )
@@ -33,17 +36,21 @@ function HomePage() {
     <main className="page-surface home-surface">
       <div className="site-container hero-layout">
         <section className="hero-copy" aria-labelledby="home-title">
-          <p className="eyebrow">Быстрая запись на звонок</p>
+          <p className="eyebrow">
+            <Sparkles size={14} aria-hidden="true" /> Быстрая запись на звонок
+          </p>
           <h1 id="home-title" tabIndex={-1}>
-            На связи
+            Meetly
           </h1>
           <p className="hero-description">
             Выберите тип встречи и удобное время. Забронируйте встречу без регистрации и лишней
             переписки.
           </p>
-          <a className="primary-link" href="/book">
-            Записаться <ArrowRight size={20} aria-hidden="true" />
-          </a>
+          <Button asChild className="primary-link hero-cta">
+            <a href="/book">
+              Записаться <ArrowRight size={20} aria-hidden="true" />
+            </a>
+          </Button>
         </section>
 
         <Card className="features-card">

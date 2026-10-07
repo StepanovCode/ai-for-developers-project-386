@@ -1,12 +1,23 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
+import { ArrowRight, CalendarDays, Clock3, Plus } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 import { createEventType, getEventType, listEventTypes } from './api/generated/sdk.gen'
 import type { EventTypeCatalog, EventTypeDetails } from './api/generated/types.gen'
+import './pages.css'
 
 export function AdminNav() {
+  const meetings = window.location.pathname === '/admin/meetings'
   return (
-    <nav aria-label="Админка">
-      <a href="/admin">Типы событий</a>
-      <a href="/admin/meetings">Предстоящие встречи</a>
+    <nav className="admin-nav" aria-label="Админка">
+      <a href="/admin" aria-current={!meetings ? 'page' : undefined}>
+        Типы событий
+      </a>
+      <a href="/admin/meetings" aria-current={meetings ? 'page' : undefined}>
+        Предстоящие встречи
+      </a>
     </nav>
   )
 }
@@ -51,62 +62,101 @@ export function EventsPage({
     <main className="page-surface">
       <section className="site-container catalog-page">
         {admin && <AdminNav />}
-        <h1 tabIndex={-1}>
-          {admin
-            ? 'Типы событий'
-            : id && data && 'eventType' in data
-              ? data.eventType.name
-              : 'Выберите тип события'}
-        </h1>
-        {notice && <p role="status">{notice}</p>}
-        {admin && (
-          <a className="primary-link" href="/admin/event-types/new">
-            Создать тип события
-          </a>
+        <div className="page-heading">
+          <h1 tabIndex={-1}>
+            {admin
+              ? 'Типы событий'
+              : id && data && 'eventType' in data
+                ? data.eventType.name
+                : 'Выберите тип события'}
+          </h1>
+          {admin && (
+            <a className="primary-link page-create-link" href="/admin/event-types/new">
+              <Plus size={18} aria-hidden="true" />
+              Создать тип события
+            </a>
+          )}
+        </div>
+        {notice && (
+          <p className="page-notice" role="status">
+            {notice}
+          </p>
         )}
-        {status === 'loading' && <p role="status">Загрузка…</p>}
+        {status === 'loading' && (
+          <p className="page-state" role="status">
+            Загрузка…
+          </p>
+        )}
         {status === 'error' && (
-          <div role="alert">
+          <div className="page-state page-error" role="alert">
             <p>Не удалось загрузить типы событий</p>
-            <button
+            <Button
+              variant="outline"
               onClick={() => {
                 setStatus('loading')
                 setAttempt(attempt + 1)
               }}
             >
               Повторить
-            </button>
+            </Button>
           </div>
         )}
         {status === 'missing' && (
-          <>
+          <div className="page-state">
             <p>Тип события не найден</p>
-            <a href="/book">К каталогу</a>
-          </>
+            <a className="page-text-link" href="/book">
+              К каталогу <ArrowRight size={16} aria-hidden="true" />
+            </a>
+          </div>
         )}
         {status === 'ready' && data && (
           <>
-            <p>{data.owner.name}</p>
+            <p className="catalog-owner">{data.owner.name}</p>
             {'items' in data ? (
               data.items.length === 0 ? (
-                <p>Пока нет доступных типов событий</p>
+                <div className="page-state empty-state">
+                  <CalendarDays size={30} aria-hidden="true" />
+                  <p>Пока нет доступных типов событий</p>
+                </div>
               ) : (
                 <div className="event-grid">
                   {data.items.map((event) => (
                     <a className="event-card" key={event.id} href={`/book/${event.id}`}>
-                      <h2>{event.name}</h2>
-                      <p>{event.durationMinutes} минут</p>
-                      <p className="event-excerpt">{event.description}</p>
+                      <Card className="event-card-surface">
+                        <CardContent>
+                          <div className="event-card-top">
+                            <span className="page-icon">
+                              <CalendarDays size={24} aria-hidden="true" />
+                            </span>
+                            <span className="duration-pill">
+                              <Clock3 size={14} aria-hidden="true" />
+                              {event.durationMinutes} минут
+                            </span>
+                          </div>
+                          <h2>{event.name}</h2>
+                          <p className="event-excerpt">{event.description}</p>
+                          <span className="event-card-arrow" aria-hidden="true">
+                            <ArrowRight size={20} />
+                          </span>
+                        </CardContent>
+                      </Card>
                     </a>
                   ))}
                 </div>
               )
             ) : (
-              <div>
-                <p>{data.eventType.durationMinutes} минут</p>
-                <p className="event-description">{data.eventType.description}</p>
-                <a href="/book">К каталогу</a>
-              </div>
+              <Card className="event-detail-card">
+                <CardContent>
+                  <p className="duration-pill">
+                    <Clock3 size={14} aria-hidden="true" />
+                    {data.eventType.durationMinutes} минут
+                  </p>
+                  <p className="event-description">{data.eventType.description}</p>
+                  <a className="page-text-link" href="/book">
+                    К каталогу <ArrowRight size={16} aria-hidden="true" />
+                  </a>
+                </CardContent>
+              </Card>
             )}
           </>
         )}
@@ -186,48 +236,61 @@ export function CreateEventPage({ onCreated }: { onCreated: () => void }) {
     <main className="page-surface">
       <section className="site-container catalog-page">
         <AdminNav />
-        <h1 tabIndex={-1}>Создать тип события</h1>
-        <form ref={formRef} onSubmit={submit} noValidate className="event-form">
-          <label htmlFor="name">Название</label>
-          <input
-            id="name"
-            name="name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            aria-invalid={!!fields.name}
-            aria-describedby={fields.name ? 'name-error' : undefined}
-          />
-          {fields.name && <p id="name-error">{fields.name.join('. ')}</p>}
-          <label htmlFor="description">Описание</label>
-          <textarea
-            id="description"
-            name="description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            aria-invalid={!!fields.description}
-            aria-describedby={fields.description ? 'description-error' : undefined}
-          />
-          {fields.description && <p id="description-error">{fields.description.join('. ')}</p>}
-          <label htmlFor="duration">Длительность в минутах</label>
-          <input
-            id="duration"
-            name="durationMinutes"
-            type="number"
-            min="1"
-            max="480"
-            step="1"
-            value={duration}
-            onChange={(e) => setDuration(e.target.value)}
-            aria-invalid={!!fields.durationMinutes}
-            aria-describedby={fields.durationMinutes ? 'duration-error' : undefined}
-          />
-          {fields.durationMinutes && <p id="duration-error">{fields.durationMinutes.join('. ')}</p>}
-          {error && <p role="alert">{error}</p>}
-          <button disabled={pending} type="submit">
-            {pending ? 'Создание…' : 'Создать тип'}
-          </button>
-          <a href="/admin">Отмена</a>
-        </form>
+        <Card className="form-card">
+          <div className="form-card-heading">
+            <span className="page-icon">
+              <Plus size={24} aria-hidden="true" />
+            </span>
+            <h1 tabIndex={-1}>Создать тип события</h1>
+          </div>
+          <CardContent>
+            <form ref={formRef} onSubmit={submit} noValidate className="event-form">
+              <label htmlFor="name">Название</label>
+              <Input
+                id="name"
+                name="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                aria-invalid={!!fields.name}
+                aria-describedby={fields.name ? 'name-error' : undefined}
+              />
+              {fields.name && <p id="name-error">{fields.name.join('. ')}</p>}
+              <label htmlFor="description">Описание</label>
+              <Textarea
+                id="description"
+                name="description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                aria-invalid={!!fields.description}
+                aria-describedby={fields.description ? 'description-error' : undefined}
+              />
+              {fields.description && <p id="description-error">{fields.description.join('. ')}</p>}
+              <label htmlFor="duration">Длительность в минутах</label>
+              <Input
+                id="duration"
+                name="durationMinutes"
+                type="number"
+                min="1"
+                max="480"
+                step="1"
+                value={duration}
+                onChange={(e) => setDuration(e.target.value)}
+                aria-invalid={!!fields.durationMinutes}
+                aria-describedby={fields.durationMinutes ? 'duration-error' : undefined}
+              />
+              {fields.durationMinutes && (
+                <p id="duration-error">{fields.durationMinutes.join('. ')}</p>
+              )}
+              {error && <p role="alert">{error}</p>}
+              <Button className="form-submit" disabled={pending} type="submit">
+                {pending ? 'Создание…' : 'Создать тип'}
+              </Button>
+              <a className="form-cancel" href="/admin">
+                Отмена
+              </a>
+            </form>
+          </CardContent>
+        </Card>
       </section>
     </main>
   )

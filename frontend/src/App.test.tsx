@@ -39,7 +39,7 @@ test('главная показывает сервис и обе ссылки н
   window.history.replaceState({}, '', '/')
   render(<App />)
 
-  expect(screen.getByRole('heading', { level: 1, name: 'На связи' })).toBeVisible()
+  expect(screen.getByRole('heading', { level: 1, name: 'Meetly' })).toBeVisible()
 
   const bookingLinks = screen.getAllByRole('link', { name: 'Записаться' })
   expect(bookingLinks).toHaveLength(2)

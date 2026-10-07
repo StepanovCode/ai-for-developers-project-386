@@ -230,7 +230,7 @@ test.each([
   })
   expect(window.location.pathname + window.location.search).toBe(target)
   expect(screen.queryByRole('heading', { name: 'Данные гостя' })).not.toBeInTheDocument()
-  if (target === '/') expect(screen.getByRole('heading', { name: 'На связи' })).toBeVisible()
+  if (target === '/') expect(screen.getByRole('heading', { name: 'Meetly' })).toBeVisible()
   else {
     expect(screen.getByRole('heading', { name: 'Время на 31-10-2026' })).toBeVisible()
     expect(screen.getByRole('button', { name: 'Продолжить' })).toBeDisabled()
