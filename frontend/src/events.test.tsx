@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react'
+import { act, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, test, expect, vi } from 'vitest'
 import App from './App'
 const owner = { id: 'default', name: 'Дмитрий Степанов' }
@@ -140,4 +140,84 @@ test('home heading receives focus on direct navigation', () => {
   mock({ owner, items: [] })
   render(<App />)
   expect(screen.getByRole('heading', { name: 'На связи' })).toHaveFocus()
+})
+
+test('late create success keeps the catalog chosen while request was pending', async () => {
+  window.history.replaceState({}, '', '/admin/event-types/new')
+  let complete!: (response: Response) => void
+  const delayed = new Promise<Response>((resolve) => {
+    complete = resolve
+  })
+  vi.stubGlobal(
+    'fetch',
+    vi.fn(async (request: Request) => {
+      if (request.method === 'POST') return delayed
+      return new Response(
+        JSON.stringify(
+          new URL(request.url).pathname === '/api/health' ? { status: 'ok' } : { owner, items: [] },
+        ),
+        { headers: { 'Content-Type': 'application/json' } },
+      )
+    }),
+  )
+  render(<App />)
+  fireEvent.change(screen.getByLabelText('Название'), { target: { value: 'Разговор' } })
+  fireEvent.change(screen.getByLabelText('Описание'), { target: { value: 'Описание' } })
+  fireEvent.click(screen.getByRole('button', { name: 'Создать тип' }))
+  expect(screen.getByRole('button', { name: 'Создание…' })).toBeDisabled()
+  fireEvent.click(screen.getByRole('link', { name: 'Записаться' }))
+  expect(await screen.findByText('Пока нет доступных типов событий')).toBeVisible()
+  await act(async () => {
+    complete(
+      new Response(JSON.stringify(event), {
+        status: 201,
+        headers: { 'Content-Type': 'application/json' },
+      }),
+    )
+  })
+  expect(window.location.pathname).toBe('/book')
+  expect(screen.getByRole('heading', { name: 'Выберите тип события' })).toBeVisible()
+  expect(screen.queryByText('Тип события создан')).not.toBeInTheDocument()
+})
+
+test('pending create ignores a second form submit', async () => {
+  window.history.replaceState({}, '', '/admin/event-types/new')
+  let complete!: (response: Response) => void
+  let writes = 0
+  const delayed = new Promise<Response>((resolve) => {
+    complete = resolve
+  })
+  vi.stubGlobal(
+    'fetch',
+    vi.fn(async (request: Request) => {
+      if (request.method === 'POST') {
+        writes += 1
+        return delayed
+      }
+      return new Response(
+        JSON.stringify(
+          new URL(request.url).pathname === '/api/health'
+            ? { status: 'ok' }
+            : { owner, items: [event] },
+        ),
+        { headers: { 'Content-Type': 'application/json' } },
+      )
+    }),
+  )
+  render(<App />)
+  fireEvent.change(screen.getByLabelText('Название'), { target: { value: 'Разговор' } })
+  fireEvent.change(screen.getByLabelText('Описание'), { target: { value: 'Описание' } })
+  const form = screen.getByRole('button', { name: 'Создать тип' }).closest('form')!
+  fireEvent.submit(form)
+  fireEvent.submit(form)
+  await act(async () => {
+    complete(
+      new Response(JSON.stringify(event), {
+        status: 201,
+        headers: { 'Content-Type': 'application/json' },
+      }),
+    )
+  })
+  expect(await screen.findByText('Тип события создан')).toBeVisible()
+  expect(writes).toBe(1)
 })

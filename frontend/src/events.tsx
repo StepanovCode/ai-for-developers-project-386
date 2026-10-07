@@ -123,6 +123,14 @@ export function CreateEventPage({ onCreated }: { onCreated: () => void }) {
   const [error, setError] = useState('')
   const [pending, setPending] = useState(false)
   const formRef = useRef<HTMLFormElement>(null)
+  const requestRef = useRef<AbortController | null>(null)
+  useEffect(
+    () => () => {
+      requestRef.current?.abort()
+      requestRef.current = null
+    },
+    [],
+  )
   function showFields(errors: Record<string, string[]>) {
     setFields(errors)
     const first = ['name', 'description', 'durationMinutes'].find((key) => errors[key]?.length)
@@ -130,6 +138,7 @@ export function CreateEventPage({ onCreated }: { onCreated: () => void }) {
   }
   async function submit(e: FormEvent) {
     e.preventDefault()
+    if (requestRef.current) return
     const errors: Record<string, string[]> = {}
     const trimmedName = name.trim(),
       trimmedDescription = description.trim(),
@@ -147,12 +156,16 @@ export function CreateEventPage({ onCreated }: { onCreated: () => void }) {
     setError('')
     showFields(errors)
     if (Object.keys(errors).length) return
+    const request = new AbortController()
+    requestRef.current = request
     setPending(true)
     try {
       const result = await createEventType({
         baseUrl: window.location.origin,
         body: { name, description, durationMinutes: number },
+        signal: request.signal,
       })
+      if (requestRef.current !== request) return
       if (result.data) onCreated()
       else {
         setError(result.error?.message ?? 'Не удалось создать тип события')
@@ -160,9 +173,13 @@ export function CreateEventPage({ onCreated }: { onCreated: () => void }) {
           showFields(result.error.fieldErrors)
       }
     } catch {
-      setError('Не удалось создать тип события. Повторите попытку')
+      if (requestRef.current === request)
+        setError('Не удалось создать тип события. Повторите попытку')
     } finally {
-      setPending(false)
+      if (requestRef.current === request) {
+        requestRef.current = null
+        setPending(false)
+      }
     }
   }
   return (
