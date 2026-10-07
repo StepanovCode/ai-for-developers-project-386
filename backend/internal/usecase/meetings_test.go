@@ -34,3 +34,13 @@ func TestMeetingsPassesSingleServerInstantAndOwner(t *testing.T) {
 		t.Fatalf("error %v", err)
 	}
 }
+func TestMeetingSnapshotUsesSameClockForRowsAndResponse(t *testing.T) {
+	now := time.Date(2026, 10, 7, 6, 0, 0, 123456789, time.UTC)
+	calls := 0
+	r := &meetingRepo{}
+	s := usecase.NewMeetings(r, func() time.Time { calls++; return now.Add(time.Duration(calls-1) * time.Hour) })
+	_, at, err := s.ListAt(context.Background())
+	if err != nil || !at.Equal(now) || !r.now.Equal(at) || calls != 1 {
+		t.Fatalf("at %v repo %v calls %d err %v", at, r.now, calls, err)
+	}
+}

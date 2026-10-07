@@ -23,7 +23,10 @@ function transport(items = [meeting], status = 200) {
           ? { items, timeZone: 'Europe/Moscow' }
           : { message: 'Error', code: 'INTERNAL_ERROR' },
       ),
-      { status, headers: { 'Content-Type': 'application/json' } },
+      {
+        status,
+        headers: { 'Content-Type': 'application/json', Date: new Date(Date.now()).toUTCString() },
+      },
     )
   })
   vi.stubGlobal('fetch', fetch)
@@ -125,4 +128,85 @@ test('latest refresh wins and unmount aborts pending request', async () => {
   await act(async () => {})
   view.unmount()
   expect(request.signal.aborted).toBe(true)
+})
+test.each([600000, -600000])(
+  'server clock controls initial visibility and expiry despite client skew %d',
+  async (skew) => {
+    vi.useFakeTimers()
+    vi.setSystemTime(start - 300000 + skew)
+    const fetch = transport()
+    fetch.mockResolvedValue(
+      new Response(JSON.stringify({ items: [meeting], timeZone: 'Europe/Moscow' }), {
+        headers: {
+          'Content-Type': 'application/json',
+          Date: new Date(start - 300000).toUTCString(),
+        },
+      }),
+    )
+    render(<MeetingsPage />)
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(0)
+    })
+    expect(screen.getByText('Гость')).toBeVisible()
+    // Changing the operating-system wall clock must not move the server anchor.
+    vi.setSystemTime(start + 86400000)
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(299999)
+    })
+    expect(screen.getByText('Гость')).toBeVisible()
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(1)
+    })
+    expect(screen.getByText('Предстоящих встреч пока нет')).toBeVisible()
+    expect(fetch).toHaveBeenCalledTimes(1)
+  },
+)
+test.each([undefined, 'invalid date'])(
+  'missing or invalid server Date keeps authoritative returned rows',
+  async (date) => {
+    vi.useFakeTimers()
+    vi.setSystemTime(start + 600000)
+    const fetch = transport()
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+    if (date) headers.Date = date
+    fetch.mockResolvedValue(
+      new Response(JSON.stringify({ items: [meeting], timeZone: 'Europe/Moscow' }), { headers }),
+    )
+    render(<MeetingsPage />)
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(0)
+    })
+    expect(screen.getByText('Гость')).toBeVisible()
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(600000)
+    })
+    expect(screen.getByText('Гость')).toBeVisible()
+    expect(fetch).toHaveBeenCalledTimes(1)
+  },
+)
+test('precise server header takes priority over whole-second Date', async () => {
+  vi.useFakeTimers()
+  vi.setSystemTime(start + 600000)
+  const fetch = transport()
+  fetch.mockResolvedValue(
+    new Response(JSON.stringify({ items: [meeting], timeZone: 'Europe/Moscow' }), {
+      headers: {
+        'Content-Type': 'application/json',
+        Date: new Date(start - 1000).toUTCString(),
+        'X-Server-Time': new Date(start - 500).toISOString(),
+      },
+    }),
+  )
+  render(<MeetingsPage />)
+  await act(async () => {
+    await vi.advanceTimersByTimeAsync(0)
+  })
+  await act(async () => {
+    await vi.advanceTimersByTimeAsync(499)
+  })
+  expect(screen.getByText('Гость')).toBeVisible()
+  await act(async () => {
+    await vi.advanceTimersByTimeAsync(1)
+  })
+  expect(screen.getByText('Предстоящих встреч пока нет')).toBeVisible()
 })

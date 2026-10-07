@@ -84,5 +84,7 @@
 - [ ] Завершить ручную приёмку контроллером; native browser zoom 200% и GitHub CI остаются непроверенными.
 - [x] Провести self-review и commitlint; подготовить feat(meetings): list upcoming meetings for owner.
 - [x] Проверить commits-check после коммита: 0 problems/warnings; результат в task-5-report.
+- [x] Исправить Important review20: server-time snapshot + monotonic expiry, skew/precision/missing-header tests.
+- [ ] Scoped независимое re-review исправления server clock (контроллер).
 
 После каждой задачи контроллер делает независимое ревью спецификации и качества; замечания исправляются до перехода к следующей. В конце — общее ревью ветки и итоговый make check. GitHub CI нового кода без push непроверен.

@@ -16,19 +16,25 @@ const timeFormat = new Intl.DateTimeFormat('ru-RU', {
 })
 export function MeetingsPage() {
   const [items, setItems] = useState<Meeting[]>([])
+  const [clock, setClock] = useState<{ server: number; received: number }>()
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading')
   const [revision, setRevision] = useState(0)
   useEffect(() => {
     let active = true
     const controller = new AbortController()
     void listMeetings({ baseUrl: window.location.origin, signal: controller.signal })
-      .then(({ data }) => {
+      .then(({ data, response }) => {
         if (!active) return
         if (!data) {
           setStatus('error')
           return
         }
-        setItems(data.items.filter((item) => Date.parse(item.startsAt) > Date.now()))
+        const exact = Date.parse(response?.headers.get('X-Server-Time') ?? '')
+        const dated = Date.parse(response?.headers.get('Date') ?? '')
+        const server = Number.isFinite(exact) ? exact : dated
+        // Missing clock metadata must never let client skew hide server-returned rows.
+        setClock(Number.isFinite(server) ? { server, received: performance.now() } : undefined)
+        setItems(data.items)
         setStatus('ready')
       })
       .catch(() => {
@@ -50,10 +56,10 @@ export function MeetingsPage() {
     return () => document.removeEventListener('visibilitychange', onVisible)
   }, [])
   useEffect(() => {
-    if (!items.length) return
+    if (!items.length || !clock) return
     let timer: ReturnType<typeof setTimeout>
     const schedule = () => {
-      const now = Date.now()
+      const now = clock.server + Math.max(0, performance.now() - clock.received)
       const nearest = items.reduce(
         (nearest, item) => Math.min(nearest, Date.parse(item.startsAt)),
         Infinity,
@@ -66,7 +72,7 @@ export function MeetingsPage() {
     }
     schedule()
     return () => clearTimeout(timer)
-  }, [items])
+  }, [items, clock])
   return (
     <main className="page-surface">
       <section className="site-container catalog-page">
