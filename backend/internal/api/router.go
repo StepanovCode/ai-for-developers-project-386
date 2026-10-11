@@ -14,6 +14,19 @@ import (
 
 func NewRouter() http.Handler { return newRouter(server{}) }
 
+// NewRouterWithoutDatabase serves liveness without claiming data is available.
+func NewRouterWithoutDatabase() http.Handler {
+	return newRouter(server{}, func(c *gin.Context) {
+		if c.FullPath() != "" && c.FullPath() != "/api/health" {
+			c.AbortWithStatusJSON(http.StatusServiceUnavailable, generated.ErrorBody{
+				Code: "SERVICE_UNAVAILABLE", Message: "Хранилище временно недоступно",
+			})
+			return
+		}
+		c.Next()
+	})
+}
+
 func NewRouterWithApplication(events *usecase.Events, slots ...*usecase.Slots) http.Handler {
 	handler := server{events: events}
 	if len(slots) > 0 {
@@ -26,7 +39,7 @@ func NewRouterWithBookings(events *usecase.Events, slots *usecase.Slots, booking
 	return newRouter(server{events: events, slots: slots, bookings: bookings})
 }
 
-func newRouter(handler generated.StrictServerInterface) http.Handler {
+func newRouter(handler generated.StrictServerInterface, middleware ...gin.HandlerFunc) http.Handler {
 	spec, err := generated.GetSpec()
 	if err != nil {
 		panic(fmt.Errorf("load embedded API contract: %w", err))
@@ -50,6 +63,7 @@ func newRouter(handler generated.StrictServerInterface) http.Handler {
 			writeError(c, validationError())
 		},
 	}))
+	router.Use(middleware...)
 	strict := generated.NewStrictHandlerWithOptions(handler, nil, generated.StrictGinServerOptions{
 		RequestErrorHandlerFunc:  func(c *gin.Context, _ error) { writeError(c, validationError()) },
 		HandlerErrorFunc:         writeError,

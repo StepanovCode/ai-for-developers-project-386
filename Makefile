@@ -25,6 +25,12 @@ RUN = $(COMPOSE) run --rm --no-deps -T
 .PHONY: format frontend-format backend-format check frontend-check backend-check
 .PHONY: tooling-build tooling-install commitlint commits-check workflows-check
 .PHONY: generate api-smoke
+.PHONY: production-build
+
+PRODUCTION_IMAGE ?= meetly:local
+PRODUCTION_PLATFORM ?=
+production-build:
+	docker build $(if $(PRODUCTION_PLATFORM),--platform $(PRODUCTION_PLATFORM)) -t $(PRODUCTION_IMAGE) .
 
 # Sequential recipes fail immediately; generated artifacts are committed, not regenerated in CI.
 generate:
@@ -77,6 +83,7 @@ help:
 	@printf '%s\n' 'make generate       Generate OpenAPI, frontend SDK and Go server from TypeSpec in Docker'
 	@printf '%s\n' 'make api-smoke      Check SDK against running frontend/backend (make up first)'
 	@printf '%s\n' 'make migrate        Apply ordered PostgreSQL migrations (separate from API startup)' 'make database-test  Test HTTP/storage using isolated PostgreSQL database'
+	@printf '%s\n' 'make production-build  Build the standalone production image (meetly:local)'
 
 config:
 	$(COMPOSE) config --quiet

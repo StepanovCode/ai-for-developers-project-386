@@ -1,4 +1,27 @@
-# Development images only need their Dockerfiles; sources use bind mounts.
+# Include only the sources needed to build development and production images.
 **
+!Dockerfile
 !docker/
 !docker/*.Dockerfile
+!docker/entrypoint.sh
+!frontend/
+!frontend/**
+!backend/
+!backend/**
+
+# Never copy local dependencies, outputs, caches, or secrets into the build.
+**/node_modules
+frontend/dist
+backend/bin
+**/.env
+**/.env.*
+**/*.local
+**/*.pem
+**/*.key
+**/secrets
+**/*.tsbuildinfo
+backend/tmp
+**/*.test
+**/*.log
+**/coverage
+**/.cache

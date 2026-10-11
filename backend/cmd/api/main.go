@@ -35,18 +35,29 @@ func run(logger *slog.Logger) error {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
-	connectCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
-	database, err := repo.Open(connectCtx, cfg.DatabaseURL)
-	cancel()
+	var router http.Handler
+	if cfg.DatabaseURL == "" {
+		logger.Warn("DATABASE_URL is unset; data endpoints are unavailable")
+		router = api.NewRouterWithoutDatabase()
+	} else {
+		connectCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
+		database, err := repo.Open(connectCtx, cfg.DatabaseURL)
+		cancel()
+		if err != nil {
+			return err
+		}
+		defer database.Close()
+		application := usecase.NewEvents(database, cfg.OwnerName)
+		router = api.NewRouterWithMeetings(application, usecase.NewSlots(database, cfg.Schedule, time.Now), usecase.NewBookings(database, cfg.Schedule, time.Now), usecase.NewMeetings(database, time.Now))
+	}
+	handler, err := api.NewWebHandler(router, cfg.StaticDir)
 	if err != nil {
 		return err
 	}
-	defer database.Close()
-	application := usecase.NewEvents(database, cfg.OwnerName)
 
 	server := &http.Server{
 		Addr:              net.JoinHostPort("", cfg.Port),
-		Handler:           api.NewRouterWithMeetings(application, usecase.NewSlots(database, cfg.Schedule, time.Now), usecase.NewBookings(database, cfg.Schedule, time.Now), usecase.NewMeetings(database, time.Now)),
+		Handler:           handler,
 		ReadHeaderTimeout: 5 * time.Second,
 		ReadTimeout:       10 * time.Second,
 		WriteTimeout:      10 * time.Second,

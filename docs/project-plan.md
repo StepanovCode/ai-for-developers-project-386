@@ -1611,6 +1611,58 @@ build и 55 тестов; 1 opt-in live health тест пропущен. Сущ
 оформление шапки, отсутствие в ней кнопки записи и переход в админку.
 Изменение готово локально.
 
+### Docker и деплой — 2026-10-11 — Ожидает внешнего действия
+
+По отдельному заданию пользователя подготовлен production-запуск текущего
+Meetly. Ветка codex/docker-deploy создана после git fetch origin main от
+0b291bb. Изменения выполнены только в этой ветке; push, merge и создание
+Render-сервисов не выполнялись. Локальный main не изменён.
+[План и результаты](deployment-plan.md), [инструкция запуска и Render](deployment.md).
+
+Корневой многостадийный Dockerfile собирает frontend и два Go-бинарных файла,
+запускает приложение от UID 10001. Единственный Go HTTP-порт определяется
+PORT; STATIC_DIR включает SPA. API, отсутствующие assets и скрытые файлы
+не получают SPA fallback. Бинарные файлы содержат данные часовых поясов;
+runtime содержит CA-сертификаты. Docker context исключает зависимости,
+артефакты и секреты. Dev Dockerfile/Compose не заменены.
+
+Production entrypoint применяет существующие миграции при DATABASE_URL
+и запускает API через exec. При отсутствии URL интерфейс и liveness работают,
+операции с данными возвращают JSON 503 без выдуманного хранилища. Compose
+продолжает явно передавать dev URL; утилита миграций требует URL. Неверные
+реквизиты/PORT и ошибка checksum прекращают запуск с exit 1. Условия скрытых
+Docker-тестов Хекслета не удалось подтвердить, поэтому отдельно проверен
+самостоятельный запуск только с PORT.
+
+make production-build собрал linux/arm64; вариант PRODUCTION_PLATFORM=linux/amd64
+собрал образ для Render. Обе архитектуры запущены с read-only filesystem;
+PORT=9090 и PORT=10000 обслуживают frontend/health. SIGTERM завершает процесс
+с exit 0. На отдельной временной PostgreSQL 17 проверены auto-migrate,
+create → slots → booking → confirmation → owner meetings, busy slot и
+сохранность после перезапуска API; обычная dev-БД не наполнялась/не изменялась.
+
+Docker make check прошёл: 55 frontend passed, 1 opt-in live health skipped,
+Go unit/HTTP, ESLint, TypeScript, Prettier, golangci-lint, gofmt и обе сборки.
+make database-test прошёл. После ревью выполнен успешный make backend-check.
+Независимое ревью исправило SPA fallback для /missing.css/ и /missing.js/child
+с наблюдавшимся RED/GREEN, quoting DATABASE_URL для zsh и исключения
+pem/key/secrets. Браузер подтвердил Meetly/Manrope, отсутствие overflow и
+реальный список тестовой встречи; console чистая.
+
+make commitlint принял feat(deploy): add production Docker image. make
+commits-check падает на уже существующем 0b291bb (неправильный заголовок
+squash PR #22); история не переписывалась, исправление CI вне текущей задачи.
+git diff --check прошёл. Hexlet workflow, generated контракт/SDK, version.txt
+и CHANGELOG.md сохранены без изменений.
+
+Render MCP ответил реальным списком workspace (My Workspace); подключение
+к MCP подтверждено отдельно от подключения GitHub-репозитория в Render.
+Остаётся: отдельное разрешение на публикацию ветки, создание PostgreSQL
+и Docker Web Service по инструкции, проверка реального публичного сервиса
+и добавление подтверждённой ссылки в README. Free Render PostgreSQL имеет
+30-дневный срок; для долгосрочной доступности нужна соответствующая БД.
+Деплой и учебное задание целиком пока не завершены.
+
 ## Официальные источники
 
 При реализации проверять актуальные инструкции и совместимость версий.
