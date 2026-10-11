@@ -23,7 +23,7 @@ RUN = $(COMPOSE) run --rm --no-deps -T
 .PHONY: lint frontend-lint backend-lint lint-fix frontend-lint-fix backend-lint-fix
 .PHONY: typecheck frontend-typecheck format-check frontend-format-check backend-format-check
 .PHONY: format frontend-format backend-format check frontend-check backend-check
-.PHONY: tooling-build tooling-install commitlint commits-check workflows-check
+.PHONY: tooling-build tooling-install commitlint workflows-check
 .PHONY: generate api-smoke
 .PHONY: production-build
 
@@ -78,7 +78,6 @@ help:
 	@printf '%s\n' \
 	  'make tooling-build / tooling-install  Prepare commitlint in Docker' \
 	  'make commitlint     Check a commit message from stdin' \
-	  'make commits-check Validate history after adoption of Conventional Commits' \
 	  'make workflows-check  Validate CI and release workflows with actionlint'
 	@printf '%s\n' 'make generate       Generate OpenAPI, frontend SDK and Go server from TypeSpec in Docker'
 	@printf '%s\n' 'make api-smoke      Check SDK against running frontend/backend (make up first)'
@@ -222,10 +221,6 @@ tooling-install:
 # Read a complete commit message from stdin.
 commitlint:
 	@$(RUN) tooling tools/node_modules/.bin/commitlint --config tools/commitlint.config.mjs
-
-# Validate all commits since adoption; the original Hexlet history is excluded.
-commits-check:
-	$(RUN) tooling sh -ec 'baseline=$$(cat .commitlint-baseline); git merge-base --is-ancestor "$$baseline" HEAD; tools/node_modules/.bin/commitlint --config tools/commitlint.config.mjs --from "$$baseline" --to HEAD --verbose'
 
 workflows-check:
 	docker run --rm -v "$(CURDIR):/repo:ro" -w /repo rhysd/actionlint:1.7.12 -color .github/workflows/ci.yml .github/workflows/release-please.yml

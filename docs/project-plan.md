@@ -1663,6 +1663,32 @@ Render MCP ответил реальным списком workspace (My Workspac
 30-дневный срок; для долгосрочной доступности нужна соответствующая БД.
 Деплой и учебное задание целиком пока не завершены.
 
+### Docker: исправление проверки CI в PR #24 — 2026-10-11
+
+Пользователь опубликовал ветку и открыл
+[PR #24](https://github.com/StepanovCode/ai-for-developers-project-386/pull/24).
+В [CI](https://github.com/StepanovCode/ai-for-developers-project-386/actions/runs/38148974749)
+для 2b8c480 frontend и backend, включая database-test, прошли. Job commits
+упал на make commits-check: исторический squash-коммит PR #22 имеет заголовок
+feat/booking implementation (#22), ошибки subject-empty и type-empty.
+Заголовок PR #24 корректен; его проверка и actionlint в этом run были пропущены
+после падения истории.
+
+По окончательному решению пользователя проверка истории удалена полностью:
+цель make commits-check, её вызов в CI и .commitlint-baseline. Скрипты
+tools/check-commits.sh и tools/check-commits.test.sh удалены до коммита;
+исключений для исторических SHA нет. В CI сохранены проверка заголовка PR
+через commitlint и проверка workflows через actionlint. Перед созданием
+коммита его сообщение проверяется через make commitlint. AGENTS.md и
+releases.md приведены в соответствие с этим порядком.
+
+make workflows-check и make commitlint для сообщения
+fix(ci): remove commit history validation прошли в Docker.
+Код приложения, Dockerfile и workflow Хекслета не изменены.
+Новый GitHub Actions run для исправления ещё не запускался; push и merge
+не выполнялись. После публикации изменений требуется подтвердить CI
+в PR #24; статус деплоя остаётся прежним.
+
 ## Официальные источники
 
 При реализации проверять актуальные инструкции и совместимость версий.
