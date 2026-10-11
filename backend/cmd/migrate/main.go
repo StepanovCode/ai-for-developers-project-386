@@ -13,6 +13,9 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	if cfg.DatabaseURL == "" {
+		log.Fatal("DATABASE_URL is required for migrations")
+	}
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 	defer cancel()
 	database, err := repo.Open(ctx, cfg.DatabaseURL)

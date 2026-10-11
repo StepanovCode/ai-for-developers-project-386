@@ -124,6 +124,13 @@ SQL и запись версии фиксируются одной транза�
 
 ## Документация
 
+Production-образ собирается из корневого `Dockerfile`: `make production-build`.
+`docker run --rm -e PORT=9090 -p 9090:9090 meetly:local` автоматически
+запускает интерфейс и health endpoint. Для работы с данными задайте
+`DATABASE_URL` внешней PostgreSQL; миграции выполняются при старте контейнера.
+[Запуск образа и точные настройки Render](docs/deployment.md).
+Публичный деплой пока не выполнен; ссылка будет добавлена после проверки сервиса.
+
 - [API: TypeSpec, генерация SDK/Go, форматы и команды](api/README.md).
 - [Окружение Docker: команды, кеши, порты и очистка](docs/docker.md).
 - [Frontend: структура, shadcn/ui и команды](frontend/README.md).

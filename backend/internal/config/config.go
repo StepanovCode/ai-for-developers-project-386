@@ -10,6 +10,7 @@ import (
 type Config struct {
 	Port        string
 	DatabaseURL string
+	StaticDir   string
 	OwnerName   string
 	Schedule    domain.Schedule
 }
@@ -24,9 +25,6 @@ func Load() (Config, error) {
 		return Config{}, fmt.Errorf("PORT must be an integer between 1 and 65535, got %q", port)
 	}
 	databaseURL := os.Getenv("DATABASE_URL")
-	if databaseURL == "" {
-		databaseURL = "postgres://booking:booking@postgres:5432/booking?sslmode=disable"
-	}
 	ownerName := os.Getenv("OWNER_NAME")
 	if ownerName == "" {
 		ownerName = "Дмитрий Степанов"
@@ -35,5 +33,5 @@ func Load() (Config, error) {
 	if err != nil {
 		return Config{}, err
 	}
-	return Config{Schedule: schedule, Port: strconv.Itoa(number), DatabaseURL: databaseURL, OwnerName: ownerName}, nil
+	return Config{Schedule: schedule, Port: strconv.Itoa(number), DatabaseURL: databaseURL, StaticDir: os.Getenv("STATIC_DIR"), OwnerName: ownerName}, nil
 }

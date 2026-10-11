@@ -51,15 +51,13 @@ BREAKING CHANGE: set PORT instead of API_PORT in the server environment.
 make tooling-build
 make tooling-install
 printf '%s\n' 'feat: add application scaffold' | make commitlint
-make commits-check
 make workflows-check
 ```
 
 `tools/package-lock.json` фиксирует commitlint и зависимости. Профиль Compose
-`tools` отделён от запуска приложения. `make commits-check` проверяет все
-коммиты после SHA в `.commitlint-baseline` вплоть до текущего HEAD; исходные
-коммиты Хекслета исключены. Нужна полная Git-история (`fetch-depth: 0` в CI).
-Стандартные merge-коммиты игнорируются commitlint; в проекте используется squash.
+`tools` отделён от запуска приложения. Перед созданием коммита проверяйте
+его сообщение через `make commitlint`; историю коммитов CI не проверяет.
+Заголовок PR проверяется автоматически и используется для squash-коммита.
 Проверка сообщения не создаёт коммит, а локальные Git hooks не устанавливаются.
 
 `.github/workflows/ci.yml` запускается на push и PR, в том числе при изменении
@@ -67,7 +65,7 @@ make workflows-check
 
 - `frontend`: установка из lockfile, ESLint, TypeScript, Prettier, тест и сборка;
 - `backend`: установка/проверка модулей, golangci-lint, gofmt, тест и сборка;
-- `commits`: commitlint для истории и заголовка PR, actionlint для новых workflows.
+- `commits`: commitlint для заголовка PR, actionlint для новых workflows.
 
 CI использует те же Dockerfile и Make-команды, что локальная разработка.
 Workflow Хекслета сохранён отдельно. В branch protection рекомендуется сделать
