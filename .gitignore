@@ -1,10 +1,9 @@
 # Keep the shared project instructions despite a global AGENTS.md ignore rule.
 !/AGENTS.md
 
-# Share only the secret-free project MCP configuration.
-!/.codex/
-/.codex/*
-!/.codex/config.toml
+# Local agent configuration and working files.
+/.codex/
+/.superpowers/
 
 # Local configuration and secrets (safe examples stay in Git).
 .env
